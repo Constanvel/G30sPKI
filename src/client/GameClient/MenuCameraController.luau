@@ -3,9 +3,9 @@ local RunService=game:GetService("RunService")
 local Lighting=game:GetService("Lighting")
 local MenuCameraController={}
 MenuCameraController.__index=MenuCameraController
-local properties={ClockTime=0.3,Brightness=1.5,Ambient=Color3.fromRGB(88,101,118),OutdoorAmbient=Color3.fromRGB(75,88,105),FogColor=Color3.fromRGB(45,58,70),FogStart=45,FogEnd=205,ExposureCompensation=0.08}
+local properties={ClockTime=0.3,Brightness=1.5,Ambient=Color3.fromRGB(96,109,120),OutdoorAmbient=Color3.fromRGB(91,104,114),FogColor=Color3.fromRGB(48,59,61),FogStart=45,FogEnd=205,ExposureCompensation=0.12}
 local effects={
- Atmosphere={Density=0.23,Offset=0.05,Color=Color3.fromRGB(151,170,186),Decay=Color3.fromRGB(62,77,92),Haze=1.2,Glare=0},
+ Atmosphere={Density=0.24,Offset=0.05,Color=Color3.fromRGB(137,151,158),Decay=Color3.fromRGB(56,69,69),Haze=1.6,Glare=0},
  BloomEffect={Intensity=0.12,Threshold=2.3,Size=12},
  SunRaysEffect={Enabled=false},
 }
@@ -49,7 +49,7 @@ function MenuCameraController:start(scene)
  end
  local marker=scene and scene:FindFirstChild("CameraAnchor")
  local valid=marker and marker:IsA("BasePart")
- self.base=if valid then marker.CFrame else CFrame.lookAt(Vector3.new(1005,6.7,42),Vector3.new(1005,5,-38))
+ self.base=if valid then marker.CFrame else CFrame.lookAt(Vector3.new(1005,135.2,40),Vector3.new(1010,130.3,-30))
  self.time=0; self.pose=self.base
  self.active=true
  self:refresh()

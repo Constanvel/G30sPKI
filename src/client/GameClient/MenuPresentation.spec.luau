@@ -5,6 +5,7 @@ return function(player)
  check(root:FindFirstChild("MainMenuController")~=nil,"RED: MainMenuController belum tersedia")
  local gui = player.PlayerGui:FindFirstChild("MainMenuGui")
  check(gui~=nil and gui.Enabled,"Menu tampil saat startup")
+ check(gui.Root.Brand.Kicker.Text:find("LUBANG BUAYA",1,true)~=nil,"Label lokasi harus sesuai latar")
  check(gui.ScreenInsets==Enum.ScreenInsets.CoreUISafeInsets,"Menu harus menghormati area Roblox CoreGui")
  for _,name in ipairs({"Start","Resume","Chapters","Archive","Settings","Credits"}) do
   local button=gui.Root.Navigation:FindFirstChild(name)

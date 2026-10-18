@@ -42,7 +42,7 @@ function View.new(player)
  root.BackgroundTransparency=1; root.Parent=gui; self.root=root
  local brand=Instance.new("CanvasGroup"); brand.Name="Brand"; brand.BackgroundTransparency=1; brand.Parent=root; self.brand=brand
  self.brandPadding=Instance.new("UIPadding"); self.brandPadding.Parent=brand
- self.kicker=text(brand,"Kicker","JAKARTA  /  1965",UDim2.new(1,0,0,18),UDim2.new(),11); self.kicker.TextColor3=muted
+ self.kicker=text(brand,"Kicker","LUBANG BUAYA  /  JAKARTA",UDim2.new(1,0,0,18),UDim2.new(),11); self.kicker.TextColor3=muted
  self.year=text(brand,"Year","1965",UDim2.new(1,0,0,140),UDim2.fromOffset(-4,22),130)
  self.year.Font=Enum.Font.Bodoni
  self.subtitle=text(brand,"Subtitle","TUJUH PERSPEKTIF",UDim2.new(1,0,0,28),UDim2.fromOffset(0,160),21)
@@ -104,7 +104,7 @@ function View.new(player)
  text(credits,"Team","TIM PENGEMBANG",UDim2.new(1,0,0,24),UDim2.new(),11).TextColor3=red
  text(credits,"Names","Reiner  /  Pemrograman & integrasi\nFahkri  /  Riset sejarah\nRama  /  Map & lingkungan\nRaja  /  UI & audio",UDim2.new(1,0,0,154),UDim2.fromOffset(0,40),16)
  text(credits,"Assets","ASET & CATATAN",UDim2.new(1,0,0,24),UDim2.fromOffset(0,221),11).TextColor3=red
- text(credits,"AssetNote","Geometri menu dibuat untuk proyek ini dari primitive Roblox. Tipografi memakai font bawaan Roblox. Belum ada audio, gambar arsip, atau model eksternal. Latar merupakan rekonstruksi artistik, bukan lokasi terverifikasi.",UDim2.new(1,0,0,142),UDim2.fromOffset(0,256),14).TextColor3=muted
+ text(credits,"AssetNote","Geometri dan tipografi memakai primitive serta font Roblox. Belum ada audio, gambar arsip, atau model eksternal. Latar terinspirasi Lubang Buaya; penataan ini rekonstruksi artistik, bukan replika denah 1965.",UDim2.new(1,0,0,142),UDim2.fromOffset(0,256),14).TextColor3=muted
  local overlay=Instance.new("Frame"); overlay.Name="Black"; overlay.Size=UDim2.fromScale(1,1)
  overlay.BackgroundColor3=Color3.new(); overlay.BorderSizePixel=0; overlay.BackgroundTransparency=1
  overlay.ZIndex=10; overlay.Active=false; overlay.Parent=gui; self.overlay=overlay
