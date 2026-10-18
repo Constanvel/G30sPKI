@@ -4,6 +4,8 @@ Prototipe game edukasi sejarah di Roblox Studio. Versi VS01 menyediakan satu rua
 
 Menu utama sinematik menampilkan latar artistik Lubang Buaya dengan mesh bertekstur dari proyek BARA 1946, Terrain lokal, kamera bergerak halus, enam navigasi, checkpoint sesi, pengaturan volume/reduced motion, dan kredit. Arsip serta chapter yang belum tersedia ditandai secara jelas. Perubahan terbaru dan batas pengujian ada di [laporan latar 3D](docs/REALISTIC_MENU_RESULT.md).
 
+UI menu kini memakai desain editorial arsip, panel sesuai panjang isi, slider volume dan toggle aksesibilitas. Rincian desain serta QA tersedia pada [laporan UI](docs/EDITORIAL_UI_RESULT.md); pass ini tidak mengubah latar, lighting, kamera atau gameplay.
+
 Naskah dan aset masih placeholder teknis. Akurasi sejarah, input ponsel fisik, performa, dan kelayakan publikasi belum disahkan. Hasil pengujian tercatat di [laporan VS01](docs/VS01_RESULT.md).
 
 ## Struktur

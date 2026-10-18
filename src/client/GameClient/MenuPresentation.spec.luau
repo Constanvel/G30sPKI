@@ -16,7 +16,7 @@ return function(player)
  check(gui.Panel.Content.Archive.Empty.Text:find("Belum ada")~=nil,"Arsip harus jujur kosong")
  check(gui.Panel.Content.Chapters.Locked.Text:find("TERKUNCI")~=nil,"POV berikutnya harus terkunci")
  check(gui.Panel.Content.Settings:FindFirstChild("Motion")~=nil,"Reduced motion harus tersedia")
- check(gui.Panel.Content.Settings:FindFirstChild("MasterMinus")~=nil,"Pengaturan volume harus tersedia")
+ check(gui.Panel.Content.Settings:FindFirstChild("MasterSlider")~=nil,"Pengaturan volume harus memakai slider")
  check(workspace.CurrentCamera.CameraType==Enum.CameraType.Scriptable,"Menu menggunakan kamera Scriptable")
  local viewport=workspace.CurrentCamera.ViewportSize
  check(gui.Root.AbsolutePosition.Y>=0,"Konten tidak boleh berada di atas area CoreGui")

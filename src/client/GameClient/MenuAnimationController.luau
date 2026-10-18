@@ -1,5 +1,6 @@
 --!strict
 local TweenService=game:GetService("TweenService")
+local Style=require(script.Parent.MenuStyle)
 local Animation={}
 Animation.__index=Animation
 function Animation.new(view) return setmetatable({view=view,tweens={},targets={},generation=0,reduced=false},Animation) end
@@ -31,7 +32,7 @@ function Animation:cancel()
  for _,button in pairs(self.view.navigation) do
   button.TextTransparency=0
   local padding=button:FindFirstChildOfClass("UIPadding")
-  if padding then padding.PaddingLeft=UDim.new(0,16) end
+  if padding then padding.PaddingLeft=UDim.new(0,button:GetAttribute("RestPadding") or 12) end
  end
 end
 
@@ -48,11 +49,12 @@ function Animation:intro()
  for i,name in ipairs(view.order) do
   local button=view.navigation[name]; button.TextTransparency=1
   local padding=button:FindFirstChildOfClass("UIPadding")
-  if padding then padding.PaddingLeft=UDim.new(0,10) end
+  local rest=button:GetAttribute("RestPadding") or 12
+  if padding then padding.PaddingLeft=UDim.new(0,rest-4) end
   task.delay(0.12+i*0.055,function()
    if token==self.generation then
     self:tween(button,0.28,{TextTransparency=0})
-    if padding then self:tween(padding,0.28,{PaddingLeft=UDim.new(0,if button:GetAttribute("Highlighted") then 22 else 16)}) end
+    if padding then self:tween(padding,0.28,{PaddingLeft=UDim.new(0,rest+(if button:GetAttribute("Highlighted") then 4 else 0))}) end
    end
   end)
  end
@@ -84,9 +86,19 @@ end
 function Animation:feedback(button,selected)
  local available=button:GetAttribute("Available")~=false
  button:SetAttribute("Highlighted",selected and available)
- self:tween(button,0.16,{BackgroundTransparency=if selected and available then 0.78 else 1,TextColor3=if not available then Color3.fromRGB(143,153,149) elseif selected then Color3.fromRGB(255,239,206) else Color3.fromRGB(232,226,208)})
+ local highlighted=selected and available
+ local slider=button:GetAttribute("SettingName")~=nil
+ self:tween(button,0.14,{BackgroundTransparency=if highlighted and not slider then 0.72 else 1,TextColor3=if not available then Style.muted else Style.text})
+ if slider then
+  self:tween(button.Track.Handle.FocusRing,0.14,{Transparency=if highlighted then 0 else 1})
+  self:tween(button.Track.Handle,0.14,{BackgroundColor3=if highlighted then Style.accent else Style.text})
+  return
+ end
  local padding=button:FindFirstChildOfClass("UIPadding")
- if padding then self:tween(padding,0.16,{PaddingLeft=UDim.new(0,if selected and available and not self.reduced then 22 else 16)}) end
+ local rest=button:GetAttribute("RestPadding") or 12
+ if padding then self:tween(padding,0.14,{PaddingLeft=UDim.new(0,rest+(if highlighted and not self.reduced and not button:GetAttribute("FixedText") then 4 else 0))}) end
+ local index=button:FindFirstChild("Index")
+ if index then self:tween(index,0.14,{TextColor3=if highlighted then Style.accentText else Style.secondary}) end
  local line=button:FindFirstChild("Indicator")
  if line then self:tween(line,0.16,{BackgroundTransparency=if selected and available then 0 else 1,Size=UDim2.fromOffset(2,if selected and available then 24 else 10)}) end
 end
