@@ -5,6 +5,8 @@ return function(player)
  local camera=Camera.new(player)
  local original=workspace.CurrentCamera
  local before={fov=original.FieldOfView,time=game.Lighting.ClockTime,ambient=game.Lighting.Ambient,effects={}}
+ local restored={}
+ for _,key in ipairs({"LightingStyle","EnvironmentDiffuseScale","EnvironmentSpecularScale","ShadowSoftness"}) do restored[key]=game.Lighting[key] end
  for _,effect in ipairs(game.Lighting:GetChildren()) do
   if effect:IsA("Atmosphere") then before.effects[effect]={Density=effect.Density,Color=effect.Color,Haze=effect.Haze,Offset=effect.Offset,Decay=effect.Decay,Glare=effect.Glare}
   elseif effect:IsA("BloomEffect") then before.effects[effect]={Intensity=effect.Intensity,Threshold=effect.Threshold,Size=effect.Size}
@@ -33,6 +35,7 @@ return function(player)
  assert(ok,message)
  check(original.CameraType==Enum.CameraType.Custom and original.FieldOfView==before.fov,"Kamera gameplay dipulihkan")
  check(game.Lighting.ClockTime==before.time and game.Lighting.Ambient==before.ambient,"Pencahayaan dipulihkan")
+ for key,value in pairs(restored) do check(game.Lighting[key]==value,"Pengaturan rendering tidak dipulihkan: "..key) end
  for effect,properties in pairs(before.effects) do for property,value in pairs(properties) do check(effect[property]==value,"Efek gameplay tidak dipulihkan: "..property) end end
  return tostring(checks).." camera assertions PASS"
 end

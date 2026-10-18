@@ -104,7 +104,7 @@ function View.new(player)
  text(credits,"Team","TIM PENGEMBANG",UDim2.new(1,0,0,24),UDim2.new(),11).TextColor3=red
  text(credits,"Names","Reiner  /  Pemrograman & integrasi\nFahkri  /  Riset sejarah\nRama  /  Map & lingkungan\nRaja  /  UI & audio",UDim2.new(1,0,0,154),UDim2.fromOffset(0,40),16)
  text(credits,"Assets","ASET & CATATAN",UDim2.new(1,0,0,24),UDim2.fromOffset(0,221),11).TextColor3=red
- text(credits,"AssetNote","Geometri dan tipografi memakai primitive serta font Roblox. Belum ada audio, gambar arsip, atau model eksternal. Latar terinspirasi Lubang Buaya; penataan ini rekonstruksi artistik, bukan replika denah 1965.",UDim2.new(1,0,0,142),UDim2.fromOffset(0,256),14).TextColor3=muted
+ text(credits,"AssetNote","Mesh rumah, pohon, pagar, peti dan lentera digunakan ulang dari proyek BARA 1946 milik Constancexz. Material dan font Roblox. Belum ada audio atau gambar arsip. Latar Lubang Buaya adalah rekonstruksi artistik, bukan replika denah 1965.",UDim2.new(1,0,0,142),UDim2.fromOffset(0,256),14).TextColor3=muted
  local overlay=Instance.new("Frame"); overlay.Name="Black"; overlay.Size=UDim2.fromScale(1,1)
  overlay.BackgroundColor3=Color3.new(); overlay.BorderSizePixel=0; overlay.BackgroundTransparency=1
  overlay.ZIndex=10; overlay.Active=false; overlay.Parent=gui; self.overlay=overlay
