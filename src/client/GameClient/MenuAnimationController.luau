@@ -26,8 +26,13 @@ function Animation:cancel()
  table.clear(self.tweens); table.clear(self.targets)
  self.view.overlay.BackgroundTransparency=1
  self.view.brand.GroupTransparency=0
+ if self.view.brandPadding then self.view.brandPadding.PaddingTop=UDim.new() end
  self.view.meta.TextTransparency=0
- for _,button in pairs(self.view.navigation) do button.TextTransparency=0 end
+ for _,button in pairs(self.view.navigation) do
+  button.TextTransparency=0
+  local padding=button:FindFirstChildOfClass("UIPadding")
+  if padding then padding.PaddingLeft=UDim.new(0,16) end
+ end
 end
 
 function Animation:intro()
@@ -38,11 +43,17 @@ function Animation:intro()
  self:tween(view.overlay,if self.reduced then 0.08 else 0.6,{BackgroundTransparency=1})
  if self.reduced then return end
  view.brand.GroupTransparency=1; view.meta.TextTransparency=1
- self:tween(view.brand,0.65,{GroupTransparency=0})
+ if view.brandPadding then view.brandPadding.PaddingTop=UDim.new(0,6); self:tween(view.brandPadding,0.7,{PaddingTop=UDim.new()}) end
+ self:tween(view.brand,0.7,{GroupTransparency=0})
  for i,name in ipairs(view.order) do
   local button=view.navigation[name]; button.TextTransparency=1
+  local padding=button:FindFirstChildOfClass("UIPadding")
+  if padding then padding.PaddingLeft=UDim.new(0,10) end
   task.delay(0.12+i*0.055,function()
-   if token==self.generation then self:tween(button,0.28,{TextTransparency=0}) end
+   if token==self.generation then
+    self:tween(button,0.28,{TextTransparency=0})
+    if padding then self:tween(padding,0.28,{PaddingLeft=UDim.new(0,if button:GetAttribute("Highlighted") then 22 else 16)}) end
+   end
   end)
  end
  task.delay(0.6,function() if token==self.generation then self:tween(view.meta,0.4,{TextTransparency=0}) end end)
@@ -72,9 +83,12 @@ end
 
 function Animation:feedback(button,selected)
  local available=button:GetAttribute("Available")~=false
- self:tween(button,0.14,{BackgroundTransparency=if selected and available then 0.55 else 1,TextColor3=if not available then Color3.fromRGB(123,126,122) elseif selected then Color3.fromRGB(255,239,206) else Color3.fromRGB(224,218,201)})
+ button:SetAttribute("Highlighted",selected and available)
+ self:tween(button,0.16,{BackgroundTransparency=if selected and available then 0.78 else 1,TextColor3=if not available then Color3.fromRGB(143,153,149) elseif selected then Color3.fromRGB(255,239,206) else Color3.fromRGB(232,226,208)})
+ local padding=button:FindFirstChildOfClass("UIPadding")
+ if padding then self:tween(padding,0.16,{PaddingLeft=UDim.new(0,if selected and available and not self.reduced then 22 else 16)}) end
  local line=button:FindFirstChild("Indicator")
- if line then self:tween(line,0.14,{BackgroundTransparency=if selected and available then 0 else 1}) end
+ if line then self:tween(line,0.16,{BackgroundTransparency=if selected and available then 0 else 1,Size=UDim2.fromOffset(2,if selected and available then 24 else 10)}) end
 end
 
 return Animation

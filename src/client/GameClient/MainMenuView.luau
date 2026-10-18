@@ -1,7 +1,8 @@
 --!strict
+local GuiService=game:GetService("GuiService")
 local View={}
-local cream=Color3.fromRGB(224,218,201)
-local muted=Color3.fromRGB(153,162,158)
+local cream=Color3.fromRGB(232,226,208)
+local muted=Color3.fromRGB(184,193,187)
 local red=Color3.fromRGB(171,82,66)
 local function text(parent,name,value,size,position,fontSize)
  local label=Instance.new("TextLabel")
@@ -22,24 +23,25 @@ local function button(parent,name,value,size,position)
  selection.BackgroundTransparency=1; selection.BorderSizePixel=0; b.SelectionImageObject=selection; selection.Parent=b
  local padding=Instance.new("UIPadding"); padding.PaddingLeft=UDim.new(0,16); padding.PaddingRight=UDim.new(0,10); padding.Parent=b
  local indicator=Instance.new("Frame"); indicator.Name="Indicator"; indicator.BackgroundColor3=red
- indicator.BorderSizePixel=0; indicator.BackgroundTransparency=1; indicator.Size=UDim2.fromOffset(2,18)
- indicator.Position=UDim2.new(0,-12,0.5,-9); indicator.Parent=b
+ indicator.BorderSizePixel=0; indicator.BackgroundTransparency=1; indicator.Size=UDim2.fromOffset(2,10)
+ indicator.AnchorPoint=Vector2.new(0,0.5); indicator.Position=UDim2.new(0,-12,0.5,0); indicator.Parent=b
  return b
 end
 
 function View.new(player)
  local self={navigation={},pages={},settings={},order={"Start","Resume","Chapters","Archive","Settings","Credits"}}
  local gui=Instance.new("ScreenGui"); gui.Name="MainMenuGui"; gui.ResetOnSpawn=false
- gui.DisplayOrder=30; gui.ScreenInsets=Enum.ScreenInsets.DeviceSafeInsets
+ gui.DisplayOrder=30; gui.ScreenInsets=Enum.ScreenInsets.CoreUISafeInsets
  gui.ClipToDeviceSafeArea=true; gui.ZIndexBehavior=Enum.ZIndexBehavior.Sibling; gui.Enabled=false
  local shade=Instance.new("Frame"); shade.Name="Shade"; shade.Size=UDim2.fromScale(1,1)
  shade.BackgroundColor3=Color3.fromRGB(8,14,16); shade.BorderSizePixel=0; shade.Parent=gui
  local gradient=Instance.new("UIGradient")
- gradient.Transparency=NumberSequence.new({NumberSequenceKeypoint.new(0,0.06),NumberSequenceKeypoint.new(0.4,0.26),NumberSequenceKeypoint.new(1,0.88)})
+ gradient.Transparency=NumberSequence.new({NumberSequenceKeypoint.new(0,0.1),NumberSequenceKeypoint.new(0.38,0.32),NumberSequenceKeypoint.new(0.7,0.72),NumberSequenceKeypoint.new(1,0.91)})
  gradient.Parent=shade
  local root=Instance.new("CanvasGroup"); root.Name="Root"; root.Size=UDim2.fromScale(1,1)
  root.BackgroundTransparency=1; root.Parent=gui; self.root=root
  local brand=Instance.new("CanvasGroup"); brand.Name="Brand"; brand.BackgroundTransparency=1; brand.Parent=root; self.brand=brand
+ self.brandPadding=Instance.new("UIPadding"); self.brandPadding.Parent=brand
  self.kicker=text(brand,"Kicker","JAKARTA  /  1965",UDim2.new(1,0,0,18),UDim2.new(),11); self.kicker.TextColor3=muted
  self.year=text(brand,"Year","1965",UDim2.new(1,0,0,140),UDim2.fromOffset(-4,22),130)
  self.year.Font=Enum.Font.Bodoni
@@ -51,7 +53,7 @@ function View.new(player)
  nav.ScrollingDirection=Enum.ScrollingDirection.Y; nav.CanvasSize=UDim2.new(); nav.Selectable=false; nav.Parent=root; self.nav=nav
  local labels={Start="MULAI",Resume="LANJUTKAN",Chapters="PILIH CHAPTER",Archive="ARSIP SEJARAH",Settings="PENGATURAN",Credits="KREDIT"}
  for _,name in ipairs(self.order) do self.navigation[name]=button(nav,name,labels[name],UDim2.fromOffset(280,46),UDim2.new()) end
- self.meta=text(root,"Meta","PROTOTIPE VS01    /    LATAR REKONSTRUKSI ARTISTIK",UDim2.new(1,-60,0,18),UDim2.new(),10)
+ self.meta=text(root,"Meta","VS01  ·  PROTOTIPE    /    LATAR ARTISTIK",UDim2.new(1,-60,0,18),UDim2.new(),11)
  self.meta.TextColor3=muted
 
  local panel=Instance.new("CanvasGroup"); panel.Name="Panel"; panel.AnchorPoint=Vector2.new(0.5,0.5)
@@ -111,27 +113,34 @@ function View.new(player)
  function self:layout()
   local w,h=root.AbsoluteSize.X,root.AbsoluteSize.Y
   if w<1 or h<1 then return end
-  local compact=h<480 and w>h
+  local topLeft,bottomRight=GuiService:GetGuiInset()
+  for _,background in ipairs({shade,overlay}) do
+   background.Position=UDim2.fromOffset(-topLeft.X,-topLeft.Y)
+   background.Size=UDim2.new(1,topLeft.X+bottomRight.X,1,topLeft.Y+bottomRight.Y)
+  end
+  local compact=h<564 and w>h
   local margin=math.floor(w*(if compact then 0.055 else 0.075))
-  local titleSize=if compact then math.clamp(h*0.22,54,82) else math.clamp(h*0.19,82,146)
-  local brandY=if compact then 12 else math.floor(h*0.105)
+  local titleSize=if compact then math.floor(math.clamp(h*0.17,46,66)) else math.clamp(h*0.21,82,146)
+  local brandY=if compact then 4 else math.floor(h*0.07)
   brand.Position=UDim2.fromOffset(margin,brandY); brand.Size=UDim2.new(1,-margin*2,0,titleSize+108)
   self.year.TextSize=titleSize; self.year.Position=UDim2.fromOffset(-3,18); self.year.Size=UDim2.new(1,0,0,titleSize+10)
-  self.subtitle.TextSize=if compact then 16 else 21; self.subtitle.Position=UDim2.fromOffset(0,titleSize+23)
-  self.status.Position=UDim2.fromOffset(0,titleSize+55); self.status.TextSize=if compact then 11 else 13
-  local navY=if compact then math.floor(h*0.47) else math.floor(math.max(brandY+titleSize+111,h*0.46))
+  self.subtitle.TextSize=if compact then 16 else 22; self.subtitle.Position=UDim2.fromOffset(0,titleSize+(if compact then 23 else 30))
+  self.status.Position=UDim2.fromOffset(0,titleSize+(if compact then 48 else 64)); self.status.TextSize=if compact then 12 else 15
+  local pitch=if compact then 44 else 48
+  local total=if compact then 132 else 284
+  local navY=if compact then math.floor(math.max(brandY+titleSize+72,h-total-24)) else math.floor(math.max(brandY+titleSize+96,h*0.45))
   local navW=if compact then math.min(560,w-margin*2) else math.min(360,w-margin*2)
-  nav.Position=UDim2.fromOffset(margin,navY); nav.Size=UDim2.fromOffset(navW,math.max(44,h-navY-28))
+  nav.Position=UDim2.fromOffset(margin,navY); nav.Size=UDim2.fromOffset(navW,math.max(44,h-navY-24))
   for i,name in ipairs(self.order) do
    local col=if compact then (i-1)%2 else 0
    local row=if compact then math.floor((i-1)/2) else i-1
    local width=if compact then (navW-12)/2 else navW
-   local b=self.navigation[name]; b.Position=UDim2.fromOffset(col*(width+12),row*47)
-   b.Size=UDim2.fromOffset(width,44); b.TextSize=if compact then 13 else 15
+   local b=self.navigation[name]; b.Position=UDim2.fromOffset(col*(width+12),row*pitch)
+   b.Size=UDim2.fromOffset(width,44); b.TextSize=if compact then 14 else 16
   end
-  nav.CanvasSize=UDim2.fromOffset(0,if compact then 141 else 282)
+  nav.CanvasSize=UDim2.fromOffset(0,total)
   self.meta.Position=UDim2.fromOffset(margin,h-20); self.meta.Size=UDim2.new(1,-margin*2,0,18)
-  self.meta.TextSize=if w<600 then 8 else 10
+  self.meta.TextSize=if w<600 then 10 else 11
   self.panelTitle.TextSize=if w<450 then 19 else 25
   for _,name in ipairs({"Master","Ambient","UI"}) do self.settings[name.."Label"].TextSize=if w<450 then 10 else 13 end
  end

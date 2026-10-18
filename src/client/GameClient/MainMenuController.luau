@@ -24,12 +24,11 @@ function Menu.new(player,request)
  local function bind(button,callback)
   self.handlers[button]=callback
   table.insert(self.connections,button.Activated:Connect(function() self:activate(button) end))
-  for _,signal in ipairs({button.MouseEnter,button.SelectionGained}) do
-   table.insert(self.connections,signal:Connect(function() self.animation:feedback(button,true) end))
-  end
-  for _,signal in ipairs({button.MouseLeave,button.SelectionLost}) do
-   table.insert(self.connections,signal:Connect(function() self.animation:feedback(button,false) end))
-  end
+  local function feedback() self.animation:feedback(button,button:GetAttribute("PointerOver")==true or GuiService.SelectedObject==button) end
+  table.insert(self.connections,button.MouseEnter:Connect(function() button:SetAttribute("PointerOver",true); feedback() end))
+  table.insert(self.connections,button.MouseLeave:Connect(function() button:SetAttribute("PointerOver",false); feedback() end))
+  table.insert(self.connections,button.SelectionGained:Connect(feedback))
+  table.insert(self.connections,button.SelectionLost:Connect(feedback))
  end
  table.insert(self.connections,player.PlayerGui.ChildAdded:Connect(function(child)
   if child.Name=="TouchGui" and child:IsA("ScreenGui") and self.visible then child.Enabled=false end
@@ -113,7 +112,7 @@ function Menu:openPanel(name)
  self.panelName=name; self.view.gui:SetAttribute("Panel",name or "Main")
  if name then for page,frame in pairs(self.view.pages) do frame.Visible=page==name end end
  self.view.content.CanvasPosition=Vector2.zero
- self.view.panelTitle.Text=({Chapters="PILIH CHAPTER",Archive="ARSIP SEJARAH",Settings="PENGATURAN",Credits="KREDIT"})[name] or ""
+ if name then self.view.panelTitle.Text=({Chapters="PILIH CHAPTER",Archive="ARSIP SEJARAH",Settings="PENGATURAN",Credits="KREDIT"})[name] or "" end
  self.animation:panel(name)
  if GuiService.SelectedObject then GuiService.SelectedObject=if name then self.view.back else self.view.navigation.Start end
 end
