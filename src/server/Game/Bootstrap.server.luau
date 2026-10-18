@@ -46,16 +46,16 @@ local function failIfInvalid(player)
 end
 
 local function publish(player)
+ local current = service:snapshot(player)
+ if current and current.phase == "menu" then sendState(player); return end
  if failIfInvalid(player) then return end
  sendState(player)
  local state = service:snapshot(player)
- if state.phase == "title" then
-  task.delay(45,function()
-   if player.Parent == Players and service:acknowledge(player,state.revision) then publish(player) end
-  end)
- elseif state.phase == "cinematic" then
+ if state.phase == "cinematic" then
   task.delay(chapter.closingDuration,function()
-   if player.Parent == Players and not failIfInvalid(player) and service:finishCinematic(player,state.revision) then publish(player) end
+   local latest = service:snapshot(player)
+   if player.Parent == Players and latest and latest.phase == "cinematic" and latest.revision == state.revision
+    and not failIfInvalid(player) and service:finishCinematic(player,state.revision) then publish(player) end
   end)
  end
 end
@@ -65,7 +65,12 @@ local function onCharacter(player, character)
  local humanoid = character:WaitForChild("Humanoid",10)
  if not root or not humanoid or player.Character ~= character then return end
  movement[player] = {speed=humanoid.WalkSpeed,power=humanoid.JumpPower,height=humanoid.JumpHeight}
- service:reset(player)
+ local previous = service:snapshot(player)
+ if not previous then
+  service:reset(player)
+  service:enterMenu(player,service:snapshot(player).revision)
+ elseif previous.phase ~= "menu" then service:reset(player) end
+ if service:snapshot(player).phase == "menu" then publish(player); return end
  if failIfInvalid(player) then return end
  character:PivotTo(scene.SpawnMarker.CFrame)
  publish(player)
@@ -82,7 +87,7 @@ Players.PlayerRemoving:Connect(function(player)
  lastRequest[player], movement[player] = nil,nil
 end)
 
-remote.OnServerEvent:Connect(function(player,action,revision)
+remote.OnServerEvent:Connect(function(player,action,revision,chapterId)
  if typeof(action) ~= "string" then return end
  local state = service:snapshot(player)
  if not state then return end
@@ -95,9 +100,19 @@ remote.OnServerEvent:Connect(function(player,action,revision)
  if now - (lastRequest[player] or -math.huge) < 0.2 then return end
  lastRequest[player] = now
  if action == "ready" then
-  if not failIfInvalid(player) then sendState(player) end
+  if state.phase == "menu" then sendState(player)
+  elseif not failIfInvalid(player) then sendState(player) end
  elseif typeof(revision) == "number" and revision == revision and revision == state.revision then
-  if action == "continue" and service:acknowledge(player,revision) then
+  if action == "menu" and service:enterMenu(player,revision) then
+   publish(player)
+  elseif action == "start" or action == "resume" then
+   if state.phase ~= "menu" or failIfInvalid(player) then return end
+   local changed = if action == "start" then service:startChapter(player,revision,chapterId) else service:resume(player,revision)
+   if changed then
+    if player.Character then player.Character:PivotTo(scene.SpawnMarker.CFrame) end
+    publish(player)
+   end
+  elseif action == "continue" and service:acknowledge(player,revision) then
    publish(player)
   elseif action == "restart" and (state.phase == "completed" or state.phase == "error") then
    service:reset(player)
@@ -110,6 +125,8 @@ remote.OnServerEvent:Connect(function(player,action,revision)
 end)
 
 ProximityPromptService.PromptTriggered:Connect(function(object,player)
+   local current = service:snapshot(player)
+   if not current or current.phase ~= "exploring" then return end
    local now = os.clock()
    if now - (lastRequest[player] or -math.huge) < 0.2 then return end
    lastRequest[player] = now
@@ -120,7 +137,10 @@ end)
 workspace.DescendantRemoving:Connect(function(object)
  if scene and (object == scene or object:IsDescendantOf(scene)) then
   task.defer(function()
-   for _,player in ipairs(Players:GetPlayers()) do failIfInvalid(player) end
+   for _,player in ipairs(Players:GetPlayers()) do
+    local current = service:snapshot(player)
+    if current and current.phase ~= "menu" then failIfInvalid(player) end
+   end
   end)
  end
 end)
