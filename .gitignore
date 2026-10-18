@@ -1,0 +1,12 @@
+# Cadangan place dan hasil simpan Studio tetap lokal.
+*.rbxl
+*.rbxlx
+*.rbxl.lock
+*.rbxlx.lock
+/backups/
+
+# Salinan percakapan dan konfigurasi rahasia tidak dipublikasikan.
+/docs/MASTER_CONTEXT.txt
+.env
+.env.*
+!.env.example
