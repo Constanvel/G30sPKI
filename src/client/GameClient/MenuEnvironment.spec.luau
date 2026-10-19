@@ -7,15 +7,17 @@ return function()
  local count=0
  local function check(value,message) assert(value,message); count+=1 end
  local ok,message=pcall(function()
-  check(scene:GetAttribute("Location")=="Lubang Buaya","RED: latar belum menyebut Lubang Buaya")
+  check(scene:GetAttribute("Location")=="Yogyakarta, 1 Maret 1949","Latar harus menyebut Yogyakarta pada 1 Maret 1949")
   check(scene:GetAttribute("ArtisticReconstruction")==true,"Latar harus ditandai rekonstruksi artistik")
-  check(not scene:FindFirstChild("Street") and not scene:FindFirstChild("Footpath"),"Jalan suburban lama tidak boleh tersisa")
-  check(not scene:FindFirstChild("PlasterHouse",true),"Deretan rumah lama tidak boleh tersisa")
+  check(scene:GetAttribute("FictionalMeetingPlace")==true,"Pos pertemuan harus jelas merupakan lokasi fiktif")
+  check(not scene:FindFirstChild("WellZone") and not scene:FindFirstChild("WellInterior",true),"Latar lama tidak boleh tersisa")
+  check(scene:FindFirstChild("PlasterFacade",true) and scene:FindFirstChild("WoodenShutter",true),"Fasad plester dan jendela kayu harus tersedia")
   check(scene:FindFirstChild("DirtPath")~=nil,"Jalur tanah harus tersedia")
-  check(scene:FindFirstChild("WellZone")~=nil,"Petunjuk zona penting harus tersedia")
-  check(scene:FindFirstChild("TimberHut")~=nil,"Bangunan sederhana harus tersedia")
+  check(scene:FindFirstChild("MeetingPost") and scene.MeetingPost:GetAttribute("FictionalMeetingPlace")==true,"Pos pertemuan fiktif harus tersedia")
+  check(scene:FindFirstChild("WoodenRadio",true) and scene:FindFirstChild("DeliveryCrate",true),"Radio kayu dan peti pengiriman harus tersedia")
+  check(scene:FindFirstChild("LowStreetWall") and scene:FindFirstChild("StreetHouse"),"Komposisi jalan kota harus tersedia")
   check(scene:FindFirstChild("BroadleafTree",true)~=nil,"Pohon bertekstur harus tersedia")
-  check(scene:GetAttribute("VisualRevision")=="BARA-mesh-01","Latar harus memakai revisi mesh BARA")
+  check(scene:GetAttribute("VisualRevision")=="ENAM-JAM-YOGYA-01","Latar harus memakai revisi ENAM JAM")
   local parts,lights,prompts,actors,unsafe,emitters,meshes=0,0,0,0,0,0,0
   for _,object in ipairs(scene:GetDescendants()) do
    if object:IsA("BasePart") then
@@ -36,7 +38,7 @@ return function()
   task.wait(.25)
   local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Include;params.FilterDescendantsInstances={workspace.Terrain}
   local hit=workspace:Raycast(Vector3.new(1018,160,-13),Vector3.new(0,-60,0),params)
-  check(hit and math.abs(hit.Position.Y-128)<.5,"Terrain tidak boleh mengubur sumur atau fondasi bangunan")
+  check(hit and math.abs(hit.Position.Y-128)<.5,"Terrain tidak boleh mengubur jalan atau fondasi bangunan")
   check(scene.CameraAnchor:IsA("BasePart") and scene.CameraAnchor.Transparency==1,"Marker kamera wajib valid dan tersembunyi")
   local baseplate=workspace:FindFirstChild("Baseplate")
   check(not baseplate or scene.Ground.Position.Y-scene.Ground.Size.Y/2>baseplate.Position.Y+baseplate.Size.Y/2,"Baseplate gameplay tidak boleh menutupi tanah latar")

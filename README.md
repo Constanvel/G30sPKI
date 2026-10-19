@@ -1,39 +1,35 @@
-# 1965: Tujuh Perspektif
+# ENAM JAM: 1949
 
-Prototipe game edukasi sejarah di Roblox Studio. Versi VS01 menyediakan satu ruangan greybox, tiga interaksi berurutan, panel narasi, cutscene kamera, dan ulang demo.
+Game edukasi sejarah Roblox tentang Serangan Umum 1 Maret 1949 di Yogyakarta. Arah proyek mengikuti [GDD](docs/ENAM_JAM_GDD.md).
 
-Menu utama sinematik menampilkan latar artistik Lubang Buaya dengan mesh bertekstur dari proyek BARA 1946, Terrain lokal, kamera bergerak halus, enam navigasi, checkpoint sesi, pengaturan volume/reduced motion, dan kredit. Arsip serta chapter yang belum tersedia ditandai secara jelas. Perubahan terbaru dan batas pengujian ada di [laporan latar 3D](docs/REALISTIC_MENU_RESULT.md).
-
-UI menu kini memakai desain editorial arsip, panel sesuai panjang isi, slider volume dan toggle aksesibilitas. Rincian desain serta QA tersedia pada [laporan UI](docs/EDITORIAL_UI_RESULT.md); pass ini tidak mengubah latar, lighting, kamera atau gameplay.
-
-Polish animasi menambahkan intro bertahap, indikator navigasi bergerak, transisi panel yang dapat dialihkan, kamera bersiklus 28 detik dan variasi lembut pada dua lentera. Hasil pengujian serta batas performanya ada di [laporan animasi](docs/MENU_MOTION_RESULT.md).
-
-Naskah dan aset masih placeholder teknis. Akurasi sejarah, input ponsel fisik, performa, dan kelayakan publikasi belum disahkan. Hasil pengujian tercatat di [laporan VS01](docs/VS01_RESULT.md).
-
-## Struktur
-
-| Folder | Tujuan |
-| --- | --- |
-| `src/shared/Shared/Shared` | `ReplicatedStorage.Shared` |
-| `src/server/Game` | `ServerScriptService.Game` |
-| `src/client/GameClient` | `StarterPlayer.StarterPlayerScripts.GameClient` |
-| `tools/BuildVS01.luau` | Resep pembentukan greybox dan UI |
-| `docs` | Desain, rencana, dan bukti pengujian |
-
-Mapping mengikuti root Script Sync yang sudah terhubung pada workspace pengembangan. Jangan memindahkan folder source saat sync aktif.
+Implementasi saat ini: menu sinematik berlatar kampung kota menjelang fajar, lobby 1–4 pemain dengan pilihan Arga/Bima/Surya/Damar, status siap, host, serta prototipe prolog tiga interaksi dengan satu progres regu. Chapter lanjutan ditandai belum tersedia. Kemampuan khusus peran, NPC, pertempuran arcade, dan target durasi MVP belum selesai.
 
 ## Menjalankan
 
-Pada workspace pengembangan yang Script Sync-nya aktif, buka checkpoint lokal `backups/1965-tujuh-perspektif-vs01-final.rbxl` di Roblox Studio. Checkpoint tersebut merupakan baseline sebelum menu; source menu terbaru berasal dari folder `src` yang sudah tersinkron. Tekan Play, pilih MULAI pada menu, lalu Mulai pada intro chapter. Gunakan WASD dan E; Enter/Spasi melanjutkan panel narasi. Tombol MENU mengembalikan pemain ke menu utama dan menyediakan LANJUTKAN jika checkpoint sesi tersedia.
+Gunakan place pengembangan yang sedang tersambung Script Sync. Play → Mulai → pilih peran → Siap → host memilih Mulai prolog. Pemain solo juga dapat mulai. Semua anggota regu dapat mengerjakan interaksi umum. Enter/Spasi melanjutkan narasi; E atau prompt sentuh memeriksa objek. MENU membuka menu personal; LANJUTKAN mengikuti progres regu terbaru.
 
-Berkas RBXL dan folder backups diabaikan Git. Clone repositori berisi source dan dokumentasi; map, GUI, serta konfigurasi Script Sync lokal tidak otomatis dipulihkan oleh Git. Builder menyimpan resep greybox/UI, tetapi bukan pengganti penuh checkpoint place dan menolak overwrite scene yang sudah ada.
+State penting divalidasi server: kapasitas, peran unik, revision, status siap, host, urutan objektif, jarak, dan garis pandang. Checkpoint hanya hidup selama server berjalan. Satu server mendukung satu regu aktif; tidak ada matchmaking atau penyimpanan lintas server.
 
-UI dan lingkungan menu dibuat lokal dari source saat Play, sehingga tidak memerlukan model menu tersimpan di place. Tidak ada DataStore atau audio berizin yang dipasang; volume mengatur SoundGroup menu untuk integrasi audio berikutnya.
+## Struktur aktif
 
-Mesh dan tekstur diunduh dari URI dalam `MenuAssetData.luau`; cache dingin memerlukan koneksi ke Roblox. Tidak perlu mengimpor model/script dari Creator Store. Saat memulihkan checkpoint lama, jalankan isi `tools/ConfigureMenuRenderer.luau` sekali melalui Command Bar mode Edit lalu simpan place untuk memakai renderer Realistic. Pengaturan Studio ini tidak dicakup Script Sync. Terrain menu dibuat hanya pada client, jauh di atas greybox; region tersebut dipulihkan ketika scene dibersihkan.
+| Lokasi | Tujuan |
+| --- | --- |
+| src/shared/Shared/Shared | ReplicatedStorage.Shared: konfigurasi, prolog, narasi, kategori sejarah |
+| src/server/Game | Lobby, progres bersama, interaksi dan validasi server |
+| src/client/GameClient | Menu, lobby, lingkungan, kamera dan UI narasi |
+| tools/BuildPrologue.luau | Builder untuk place kosong; menolak menimpa scene/GUI |
+| docs | GDD, lingkup implementasi dan hasil QA |
 
-## Git dan Studio
+Jangan pindahkan direktori sumber saat Script Sync masih aktif. src/enamjam adalah draft terpisah yang sudah ada sebelum integrasi ini; runtime memakai tiga lokasi aktif pada tabel. Draft tersebut belum disatukan dan tidak membuktikan fitur sudah tersedia.
 
-Remote proyek: [Constanvel/G30sPKI](https://github.com/Constanvel/G30sPKI).
+## Fakta dan adaptasi
 
-Script Sync menghubungkan source lokal dengan Studio. Git menyimpan versi source setelah commit; perubahan baru dikirim ke GitHub saat push. Menyimpan atau menjalankan game di Studio tidak otomatis membuat commit maupun memublikasikan game.
+Arga, Bima, Surya, Damar, pos pertemuan, dan urutan objektif merupakan FICTIONAL_ADAPTATION. Fakta pada arsip ditautkan ke Ensiklopedia Sejarah Indonesia, Dinas Kebudayaan DIY, dan TNI AU melalui HistoricalData. TESTIMONY dan DISPUTED dipisahkan; tidak ada kutipan rekaan tokoh sejarah. Perbedaan waktu penarikan pasukan tetap dicatat dan membutuhkan riset perbandingan.
+
+Latar merupakan interpretasi artistik, bukan replika denah Yogyakarta. Mesh dan tekstur memakai aset BARA 1946 milik Constancexz; atribusi dipertahankan. Belum ada audio berlisensi yang dipasang. Cache aset dingin memerlukan jaringan Roblox.
+
+## Penyimpanan
+
+Script Sync menyimpan sumber, bukan map, GUI template, pengaturan place, atau metadata experience. Simpan salinan place baru setelah migrasi. GitHub dan judul experience publik tidak berubah otomatis. Tidak ada commit, push, atau publish pada pekerjaan ini.
+
+Berkas versi sebelumnya dipindahkan ke arsip eksternal yang tercatat pada [laporan migrasi](docs/MIGRATION_RESULT.md). Riwayat Git tetap dapat dipulihkan. Lihat laporan tersebut untuk hasil uji dan batas yang belum diverifikasi.

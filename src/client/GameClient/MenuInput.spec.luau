@@ -5,7 +5,7 @@ return function(player)
  local gui=player.PlayerGui.MainMenuGui
  local previous=game.GuiService.SelectedObject
  local fired=0
- local view={gui=gui,back=gui.Panel.Back,chapterStart=gui.Panel.Content.Chapters.VS01,navigation={},settings={},order={"Start","Resume","Chapters","Archive","Settings","Credits"}}
+ local view={gui=gui,back=gui.Panel.Back,chapterStart=gui.Panel.Content.Chapters.Prolog,navigation={},settings={},order={"Start","Resume","Chapters","Archive","Settings","Credits"}}
  for _,name in ipairs(view.order) do view.navigation[name]=gui.Root.Navigation[name] end
  for _,name in ipairs({"MasterSlider","AmbientSlider","UISlider","Motion"}) do view.settings[name]=gui.Panel.Content.Settings[name] end
  local menu=setmetatable({visible=true,pending=false,panelName="Archive",view=view,handlers={[view.navigation.Start]=function() fired+=1 end},animation={press=function() end}},Menu)
@@ -20,8 +20,12 @@ return function(player)
   assert(menu:selection()==view.settings.MasterSlider,"Pilihan slider yang sah tetap bekerja")
   menu.panelName=nil; game.GuiService.SelectedObject=nil
   assert(menu:selection()==view.navigation.Start,"Menu utama tanpa fokus memilih Mulai")
+  menu.lobbyActive=true
+  assert(#menu:focusable()==0 and menu:selection()==nil,"Menu tersembunyi selama lobi tidak boleh menerima fokus")
+  menu:activate(view.navigation.Start)
+  assert(fired==0,"Mulai tidak boleh terpanggil lewat menu selama lobi")
  end)
  game.GuiService.SelectedObject=previous
  assert(ok,message)
- return "5 input assertions PASS"
+ return "7 input assertions PASS"
 end

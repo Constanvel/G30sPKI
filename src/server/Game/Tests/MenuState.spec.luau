@@ -1,7 +1,7 @@
 --!strict
 return function()
  local ChapterService = require(script.Parent.Parent.ChapterService)
- local chapter = {id="vs01",objectives={{id="a"},{id="b"},{id="c"}}}
+ local chapter = {id="prolog",objectives={{id="a"},{id="b"},{id="c"}}}
  local service, player, count = ChapterService.new(chapter), {}, 0
  local function check(condition,message) assert(condition,message); count+=1 end
  service:reset(player)
@@ -12,10 +12,10 @@ return function()
  check(initial.phase=="menu" and not initial.hasCheckpoint,"Menu awal tidak mengarang progres")
  check(not service:resume(player,initial.revision),"Resume tanpa checkpoint ditolak")
  check(not service:startChapter(player,initial.revision,"locked"),"Chapter terkunci ditolak server")
- check(not service:startChapter(player,initial.revision-1,"vs01"),"Request lama ditolak")
- check(service:startChapter(player,initial.revision,"vs01"),"VS01 dapat dimulai")
+ check(not service:startChapter(player,initial.revision-1,"prolog"),"Request lama ditolak")
+ check(service:startChapter(player,initial.revision,"prolog"),"Prolog dapat dimulai")
  check(service:snapshot(player).phase=="title","Mulai membuka intro chapter")
- check(not service:startChapter(player,service:snapshot(player).revision,"vs01"),"Duplikasi start ditolak")
+ check(not service:startChapter(player,service:snapshot(player).revision,"prolog"),"Duplikasi start ditolak")
  service:acknowledge(player,service:snapshot(player).revision)
  service:interact(player,"a")
  service:acknowledge(player,service:snapshot(player).revision)

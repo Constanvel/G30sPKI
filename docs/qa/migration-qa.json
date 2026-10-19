@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-19",
+  "runtimeSourcesChecked": 31,
+  "sourceMismatch": [],
+  "client": [
+    {
+      "ok": true,
+      "name": "MenuPresentation.spec",
+      "result": "34 assertions PASS"
+    },
+    {
+      "ok": true,
+      "name": "MenuSettings.spec",
+      "result": "70 settings assertions PASS"
+    },
+    {
+      "ok": true,
+      "name": "MenuAnimation.spec",
+      "result": "24 animation assertions PASS"
+    },
+    {
+      "ok": true,
+      "name": "MenuInput.spec",
+      "result": "7 input assertions PASS"
+    },
+    {
+      "ok": true,
+      "name": "SubmenuPresentation.spec",
+      "result": "391 submenu assertions PASS"
+    },
+    {
+      "ok": true,
+      "name": "Lobby.spec",
+      "result": "119 lobby assertions PASS"
+    },
+    {
+      "ok": true,
+      "name": "MenuEnvironment.spec",
+      "result": "98 environment assertions PASS"
+    }
+  ],
+  "server": [
+    {
+      "ok": true,
+      "name": "SceneValidation.spec",
+      "result": "12 scene assertions PASS"
+    },
+    {
+      "ok": true,
+      "name": "MenuState.spec",
+      "result": "21 assertions PASS"
+    },
+    {
+      "ok": true,
+      "name": "Lobby.spec",
+      "result": "36 assertions PASS"
+    }
+  ],
+  "additional": [
+    {
+      "name": "MenuCamera.spec",
+      "assertions": 44,
+      "ok": true
+    },
+    {
+      "name": "Foundation.spec",
+      "assertions": 33,
+      "ok": true
+    }
+  ],
+  "totalAssertions": 889,
+  "nativeFlows": [
+    "Chapters-lobby-leave",
+    "Role-ready-launch",
+    "Three E interactions",
+    "Camera error recovery",
+    "Replay completion"
+  ],
+  "realFourClientTest": false,
+  "physicalMobileTest": false,
+  "checkpoint": {
+    "path": "D:\\1946-7-perspektif\\backups\\enam-jam-1949-lobby.rbxl",
+    "bytes": 156044,
+    "modified": "2026-10-19 13:07:35",
+    "header": "<roblox!",
+    "sha256": "948043802231FFF84B4F55080372C12DC5ECEFEEDC355E43E020C6389553AE36"
+  }
+}

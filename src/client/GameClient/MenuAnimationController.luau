@@ -5,9 +5,11 @@ local Animation={}
 Animation.__index=Animation
 function Animation.new(view)
  local self=setmetatable({view=view,tweens={},targets={},generation=0,reduced=false},Animation)
- self.resize=view.root:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-  self:later(0,function() self:marker(self.selectedNav or view.navigation.Start,true) end)
- end)
+ if view then
+  self.resize=view.root:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+   self:later(0,function() self:marker(self.selectedNav or view.navigation.Start,true) end)
+  end)
+ end
  return self
 end
 
@@ -51,6 +53,7 @@ function Animation:cancel(keepPose)
  for _,tween in ipairs(active) do tween:Cancel() end
  table.clear(self.tweens); table.clear(self.targets)
  local view=self.view
+ if not view then return end
  view.overlay.BackgroundTransparency=1; view.brand.GroupTransparency=0
  view.brandPadding.PaddingTop=UDim.new(); view.meta.TextTransparency=0
  for _,label in ipairs({view.kicker,view.year,view.subtitle,view.status}) do label.TextTransparency=0 end
@@ -184,7 +187,7 @@ function Animation:press(button)
 end
 
 function Animation:destroy()
- self:cancel();self.resize:Disconnect()
+ self:cancel();if self.resize then self.resize:Disconnect() end
 end
 
 return Animation
