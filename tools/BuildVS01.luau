@@ -75,7 +75,7 @@ assert(not remotes:FindFirstChild("NarrativeEvent"),"Remote sudah ada; tidak dit
 local remote=Instance.new("RemoteEvent"); remote.Name="NarrativeEvent"; remote.Parent=remotes
 
 local gui=Instance.new("ScreenGui")
-gui.Name="GameGui"; gui.ResetOnSpawn=false; gui.ScreenInsets=Enum.ScreenInsets.DeviceSafeInsets
+gui.Name="GameGui"; gui.Enabled=false; gui.ResetOnSpawn=false; gui.ScreenInsets=Enum.ScreenInsets.DeviceSafeInsets
 gui.ClipToDeviceSafeArea=true; gui.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
 local paper=Color3.fromRGB(225,217,194)
 local ink=Color3.fromRGB(37,40,36)
