@@ -6,7 +6,7 @@ local function text(parent,name,value,size,position,fontSize)
  local label=Instance.new("TextLabel")
  label.Name=name;label.Text=value;label.Size=size;label.Position=position
  label.BackgroundTransparency=1;label.TextColor3=Style.text;label.TextSize=fontSize or 16
- label.Font=Style.body;label.TextXAlignment=Enum.TextXAlignment.Left
+ label.FontFace=Style.body;label.TextXAlignment=Enum.TextXAlignment.Left
  label.TextYAlignment=Enum.TextYAlignment.Top;label.TextWrapped=true;label.Parent=parent
  return label
 end
@@ -18,7 +18,7 @@ end
 local function button(parent,name,value,size,position,padding)
  local b=Instance.new("TextButton");b.Name=name;b.Text=value;b.Size=size;b.Position=position
  b.BackgroundColor3=Style.surface;b.BackgroundTransparency=1;b.BorderSizePixel=0
- b.AutoButtonColor=false;b.TextColor3=Style.text;b.Font=Style.control;b.TextSize=15
+ b.AutoButtonColor=false;b.TextColor3=Style.text;b.FontFace=Style.control;b.TextSize=15
  b.TextXAlignment=Enum.TextXAlignment.Left;b.Selectable=true;b:SetAttribute("Available",true)
  b:SetAttribute("RestPadding",padding or 12);b.Parent=parent
  local selection=Instance.new("Frame");selection.Name="Focus";selection.BackgroundTransparency=1
@@ -44,9 +44,10 @@ function View.new(player)
  root.BackgroundTransparency=1;root.Parent=gui;self.root=root
  local brand=Instance.new("CanvasGroup");brand.Name="Brand";brand.BackgroundTransparency=1;brand.Parent=root;self.brand=brand
  self.brandPadding=Instance.new("UIPadding");self.brandPadding.Parent=brand
- self.kicker=text(brand,"Kicker","LUBANG BUAYA / JAKARTA",UDim2.new(1,0,0,18),UDim2.new(),11);self.kicker.TextColor3=Style.secondary
- self.year=text(brand,"Year","1965",UDim2.new(1,0,0,120),UDim2.fromOffset(-3,22),108);self.year.Font=Style.heading
+ self.kicker=text(brand,"Kicker","LUBANG BUAYA / JAKARTA",UDim2.new(1,0,0,18),UDim2.new(),12);self.kicker.TextColor3=Style.secondary
+ self.year=text(brand,"Year","1965",UDim2.new(1,0,0,120),UDim2.fromOffset(-3,22),108);self.year.FontFace=Style.heading
  self.subtitle=text(brand,"Subtitle","TUJUH PERSPEKTIF",UDim2.new(1,0,0,28),UDim2.fromOffset(0,134),20)
+ self.subtitle.FontFace=Style.control
  self.status=text(brand,"Status","Tujuh perspektif. Satu rangkaian sejarah.",UDim2.new(1,0,0,38),UDim2.fromOffset(0,170),14);self.status.TextColor3=Style.secondary
  self.brandRule=rule(brand,"EditorialRule",UDim2.fromOffset(0,215),UDim2.fromOffset(64,1))
  local nav=Instance.new("ScrollingFrame");nav.Name="Navigation";nav.BackgroundTransparency=1;nav.BorderSizePixel=0
@@ -64,14 +65,14 @@ function View.new(player)
  self.selectionMarker.BackgroundTransparency=1;self.selectionMarker.ZIndex=2
  self.resumeNote=text(self.navigation.Resume,"StateNote","Belum ada",UDim2.fromOffset(82,16),UDim2.new(1,-90,.5,-7),11)
  self.resumeNote.TextColor3=Style.secondary;self.resumeNote.TextXAlignment=Enum.TextXAlignment.Right
- self.meta=text(root,"Meta","VS01 · PROTOTIPE / LATAR ARTISTIK",UDim2.new(1,-60,0,18),UDim2.new(),10);self.meta.TextColor3=Style.secondary
+ self.meta=text(root,"Meta","VS01 · PROTOTIPE / LATAR ARTISTIK",UDim2.new(1,-60,0,18),UDim2.new(),11);self.meta.TextColor3=Style.secondary
 
  local panel=Instance.new("CanvasGroup");panel.Name="Panel";panel.AnchorPoint=Vector2.new(.5,.5)
  panel.Position=UDim2.fromScale(.5,.5);panel.Size=UDim2.fromOffset(620,488)
  panel.BackgroundColor3=Style.background;panel.BackgroundTransparency=.02;panel.BorderSizePixel=0
  panel.Visible=false;panel.Parent=gui;self.panel=panel
  self.eyebrow=text(panel,"Eyebrow","PENGATURAN",UDim2.new(1,-160,0,18),UDim2.fromOffset(28,22),11);self.eyebrow.TextColor3=Style.accentText
- self.panelTitle=text(panel,"Title","Preferensi permainan",UDim2.new(1,-130,0,38),UDim2.fromOffset(28,44),30);self.panelTitle.Font=Style.heading
+ self.panelTitle=text(panel,"Title","Preferensi permainan",UDim2.new(1,-130,0,38),UDim2.fromOffset(28,44),27);self.panelTitle.FontFace=Style.heading
  self.back=button(panel,"Back","← Kembali",UDim2.fromOffset(100,44),UDim2.new(1,-118,0,14),8);self.back.TextSize=12
  self.panelRule=rule(panel,"HeaderRule",UDim2.fromOffset(28,92),UDim2.new(1,-56,0,1))
  local content=Instance.new("ScrollingFrame");content.Name="Content";content.BackgroundTransparency=1;content.BorderSizePixel=0
@@ -87,13 +88,13 @@ function View.new(player)
  self.chapterStart=button(chapters,"VS01","Pengenalan Ahmad Yani",UDim2.new(1,0,0,88),UDim2.fromOffset(0,56),64)
  self.chapterStart.TextYAlignment=Enum.TextYAlignment.Top;self.chapterStart.TextSize=17
  self.chapterStart:FindFirstChildOfClass("UIPadding").PaddingTop=UDim.new(0,16)
- local chapterIndex=text(self.chapterStart,"Number","01",UDim2.fromOffset(44,46),UDim2.fromOffset(-52,-4),34);chapterIndex.Font=Style.heading;chapterIndex.TextColor3=Style.accent
+ local chapterIndex=text(self.chapterStart,"Number","01",UDim2.fromOffset(44,46),UDim2.fromOffset(-52,-4),34);chapterIndex.FontFace=Style.heading;chapterIndex.TextColor3=Style.accent
  text(self.chapterStart,"Description","VS01 · Prototipe teknis / dramatisasi",UDim2.new(1,0,0,32),UDim2.fromOffset(0,28),12).TextColor3=Style.secondary
  rule(chapters,"IndexRule",UDim2.fromOffset(0,156),UDim2.new(1,0,0,1))
  text(chapters,"Locked","02—07 / TERKUNCI\n\nEnam perspektif berikutnya belum diimplementasikan. Bab investigasi belum tersedia.",UDim2.new(1,0,0,72),UDim2.fromOffset(0,176),14).TextColor3=Style.secondary
  local archive=page("Archive",192)
  text(archive,"Index","INDEKS / 00 SUMBER",UDim2.new(1,0,0,20),UDim2.new(),11).TextColor3=Style.accentText
- local empty=text(archive,"Empty","Belum ada arsip yang disahkan.",UDim2.new(1,0,0,60),UDim2.fromOffset(0,30),25);empty.Font=Style.heading
+ local empty=text(archive,"Empty","Belum ada arsip yang disahkan.",UDim2.new(1,0,0,60),UDim2.fromOffset(0,30),25);empty.FontFace=Style.heading
  text(archive,"Note","Sumber sejarah akan ditampilkan setelah ditinjau tim riset. Fakta, kesaksian, dan dramatisasi akan dibedakan. Tidak ada dokumen atau kutipan rekaan dalam arsip ini.",UDim2.new(1,0,0,96),UDim2.fromOffset(0,98),14).TextColor3=Style.secondary
  local settings=page("Settings",348)
  text(settings,"AudioHeading","AUDIO",UDim2.new(1,0,0,18),UDim2.new(),11).TextColor3=Style.accentText
@@ -140,7 +141,7 @@ function View.new(player)
   local brandY=if compact then 4 else math.floor(h*.07)
   brand.Position=UDim2.fromOffset(margin,brandY);brand.Size=UDim2.new(1,-margin*2,0,titleSize+108)
   self.year.TextSize=titleSize;self.year.Position=UDim2.fromOffset(-3,18);self.year.Size=UDim2.new(1,0,0,titleSize+10)
-  self.subtitle.TextSize=if compact then 15 else 20;self.subtitle.Position=UDim2.fromOffset(0,titleSize+24)
+  self.subtitle.TextSize=if compact then 16 else 22;self.subtitle.Position=UDim2.fromOffset(0,titleSize+24)
   self.status.Position=UDim2.fromOffset(0,titleSize+(if compact then 48 else 54));self.status.TextSize=if compact then 12 else 14
   self.brandRule.Position=UDim2.fromOffset(0,titleSize+102);self.brandRule.Visible=not compact
   local pitch=if compact then 44 else 48
@@ -151,7 +152,7 @@ function View.new(player)
   for i,name in ipairs(self.order) do
    local col=if compact then (i-1)%2 else 0;local row=if compact then math.floor((i-1)/2) else i-1
    local width=if compact then (navW-16)/2 else navW
-   local b=self.navigation[name];b.Position=UDim2.fromOffset(col*(width+16),row*pitch);b.Size=UDim2.fromOffset(width,44);b.TextSize=if compact then 13 else 15
+   local b=self.navigation[name];b.Position=UDim2.fromOffset(col*(width+16),row*pitch);b.Size=UDim2.fromOffset(width,44);b.TextSize=if compact then 16 else 18
   end
   nav.CanvasSize=UDim2.fromOffset(0,total)
   self.meta.Position=UDim2.fromOffset(margin,h-20);self.meta.Size=UDim2.new(1,-margin*2,0,18)
@@ -161,7 +162,7 @@ function View.new(player)
   local header=if narrow then 120 elseif small then 76 else 108
   panel.Size=UDim2.fromOffset(math.min(620,w-32),math.min(height,h-24))
   self.eyebrow.Position=UDim2.fromOffset(inset,if small then 12 else 22)
-  self.panelTitle.Position=UDim2.fromOffset(inset,if narrow then 58 elseif small then 30 else 44);self.panelTitle.TextSize=if narrow then 25 elseif small then 25 else 30
+  self.panelTitle.Position=UDim2.fromOffset(inset,if narrow then 58 elseif small then 30 else 44);self.panelTitle.TextSize=if narrow then 23 elseif small then 23 else 27
   self.panelTitle.Size=UDim2.new(1,if narrow then -inset*2 else -140,0,38)
   self.panelRule.Position=UDim2.fromOffset(inset,header-16);self.panelRule.Size=UDim2.new(1,-inset*2,0,1)
   content.Position=UDim2.fromOffset(inset,header);content.Size=UDim2.new(1,-inset*2,1,-header-24)

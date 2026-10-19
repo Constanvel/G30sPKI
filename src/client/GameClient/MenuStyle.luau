@@ -4,5 +4,6 @@ return {
  text=Color3.fromRGB(232,225,209),secondary=Color3.fromRGB(166,165,150),
  muted=Color3.fromRGB(119,125,117),divider=Color3.fromRGB(65,72,63),accent=Color3.fromRGB(163,109,75),
  accentText=Color3.fromRGB(190,145,112),
- heading=Enum.Font.Bodoni,body=Enum.Font.Gotham,control=Enum.Font.GothamMedium,
+ heading=Font.fromName("Merriweather",Enum.FontWeight.Bold),
+ body=Font.fromName("RobotoCondensed"),control=Font.fromName("RobotoCondensed",Enum.FontWeight.Bold),
 }
