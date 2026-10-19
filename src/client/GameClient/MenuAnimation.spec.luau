@@ -44,7 +44,7 @@ return function()
   check(target.BackgroundTransparency<.72,"Klik memberi respons segera")
   view.overlay.BackgroundTransparency=0.5
   animation:panel("Credits"); animation:panel(nil); animation:panel("Settings")
-  task.wait(0.4)
+  task.wait(0.5)
   check(view.panel.Visible and not view.root.Visible and view.panel.GroupTransparency<0.01,"Klik terakhir harus menang")
   check(view.overlay.BackgroundTransparency==1,"Pergantian panel harus membersihkan overlay intro")
   animation:panel(nil);task.wait(.15)

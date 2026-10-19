@@ -37,6 +37,13 @@ function Animation:marker(button,snap)
  if not snap then self:tween(line,if self.reduced then .08 else .18,{BackgroundTransparency=0}) end
 end
 
+function Animation:settlePanel()
+ local view=self.view
+ view.eyebrow.TextTransparency=0;view.panelTitle.TextTransparency=0;view.back.TextTransparency=0;view.panelFooter.TextTransparency=0
+ view.panelRule.BackgroundTransparency=0;view.footerRule.BackgroundTransparency=0
+ for _,page in pairs(view.pages) do page.GroupTransparency=0;page.Position=UDim2.new() end
+end
+
 function Animation:cancel(keepPose)
  self.generation+=1
  local active={}
@@ -55,7 +62,9 @@ function Animation:cancel(keepPose)
   button.Indicator.BackgroundTransparency=1
   button:FindFirstChildOfClass("UIPadding").PaddingLeft=UDim.new(0,button:GetAttribute("RestPadding")+(if button:GetAttribute("Highlighted") and not self.reduced then 4 else 0))
  end
- if not keepPose then view.root.Position=UDim2.new(); view.panel.Position=UDim2.fromScale(.5,.5) end
+ if not keepPose then
+  view.root.Position=UDim2.new();view.panel.Position=UDim2.fromScale(.5,.5);self:settlePanel()
+ end
 end
 
 function Animation:intro()
@@ -100,17 +109,40 @@ function Animation:panel(name)
  local incoming=if opening then view.panel else view.root
  local outgoing=if view.root.Visible then view.root elseif view.panel.Visible then view.panel else nil
  local target=if opening then UDim2.fromScale(.5,.5) else UDim2.new()
+ local fresh=incoming~=outgoing or self.panelPage~=name
+ self.panelPage=name
  local function reveal()
   view.root.Visible=not opening; view.panel.Visible=opening
   if incoming~=outgoing then
    incoming.GroupTransparency=1
-   incoming.Position=target+(if self.reduced then UDim2.new() else UDim2.fromOffset(0,8))
+   incoming.Position=target+(if self.reduced then UDim2.new() else UDim2.fromOffset(0,if opening then 6 else 8))
   end
-  self:tween(incoming,if self.reduced then .08 else .24,{GroupTransparency=0,Position=target})
+  self:tween(incoming,if self.reduced then .08 elseif opening then .30 else .18,{GroupTransparency=0,Position=target})
+  if not opening then self:settlePanel();return end
+  if self.reduced then self:settlePanel();return end
+  local page=view.pages[name]
+  if fresh then
+   view.eyebrow.TextTransparency=1;view.panelTitle.TextTransparency=1;view.back.TextTransparency=1;view.panelFooter.TextTransparency=1
+   view.panelRule.BackgroundTransparency=1;view.footerRule.BackgroundTransparency=1
+   page.GroupTransparency=1;page.Position=UDim2.fromOffset(0,6)
+  end
+  self:later(.02,function()
+   self:tween(view.eyebrow,.18,{TextTransparency=0});self:tween(view.panelTitle,.18,{TextTransparency=0})
+  end)
+  self:later(.06,function() self:tween(view.panelRule,.16,{BackgroundTransparency=0}) end)
+  self:later(.10,function() self:tween(page,.22,{GroupTransparency=0,Position=UDim2.new()}) end)
+  self:later(.16,function()
+   self:tween(view.footerRule,.16,{BackgroundTransparency=0});self:tween(view.panelFooter,.16,{TextTransparency=0})
+  end)
+  self:later(.18,function() self:tween(view.back,.16,{TextTransparency=0}) end)
  end
  if outgoing and outgoing~=incoming then
-  local duration=if self.reduced then .04 else .1
-  self:tween(outgoing,duration,{GroupTransparency=1});self:later(duration,reveal)
+  local duration=if self.reduced then .04 elseif outgoing==view.panel then .24 else .08
+  if outgoing==view.panel and not self.reduced then
+   for _,page in pairs(view.pages) do if page.Visible then self:tween(page,.16,{GroupTransparency=1,Position=UDim2.fromOffset(0,-4)}) end end
+   self:tween(outgoing,duration,{GroupTransparency=1,Position=UDim2.fromScale(.5,.5)+UDim2.fromOffset(0,6)})
+  else self:tween(outgoing,duration,{GroupTransparency=1}) end
+  self:later(duration,reveal)
  else reveal() end
 end
 
@@ -119,7 +151,7 @@ function Animation:feedback(button,selected)
  local highlighted=selected and available
  button:SetAttribute("Highlighted",highlighted)
  local slider=button:GetAttribute("SettingName")~=nil
- self:tween(button,.18,{BackgroundTransparency=if highlighted and not slider then .72 else 1,TextColor3=if not available then Style.muted elseif highlighted then Style.text else Style.text:Lerp(Style.secondary,.18)})
+ self:tween(button,.18,{BackgroundTransparency=if highlighted and not slider then .72 else button:GetAttribute("SurfaceAlpha") or 1,TextColor3=if not available then Style.muted elseif highlighted then Style.text else Style.text:Lerp(Style.secondary,.18)})
  if slider then
   self:tween(button.Track.Handle.FocusRing,.18,{Transparency=if highlighted then 0 else 1})
   self:tween(button.Track.Handle,.18,{BackgroundColor3=if highlighted then Style.accent else Style.text})
@@ -137,6 +169,8 @@ function Animation:feedback(button,selected)
    self:marker(button,false)
   elseif self.selectedNav==button and not available then self.selectedNav=nil;self:marker(self.view.navigation.Start,false) end
  else
+  local emphasis=button:FindFirstChild("Emphasis")
+  if emphasis then self:tween(emphasis,.16,{Color=if highlighted then Style.accentText else Style.divider,Transparency=if highlighted then .1 else .7}) end
   local line=button:FindFirstChild("Indicator")
   if line then self:tween(line,.18,{BackgroundTransparency=if highlighted then 0 else 1,Size=UDim2.fromOffset(2,if highlighted then 24 else 10)}) end
  end

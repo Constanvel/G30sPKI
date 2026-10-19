@@ -169,8 +169,9 @@ function Menu:openPanel(name)
  if name then for page,frame in pairs(self.view.pages) do frame.Visible=page==name end end
  self.view.content.CanvasPosition=Vector2.zero
  if name then
-  self.view.eyebrow.Text=({Chapters="PILIH CHAPTER",Archive="ARSIP SEJARAH",Settings="PENGATURAN",Credits="KREDIT"})[name] or ""
+  self.view.eyebrow.Text=({Chapters="03 / PILIH CHAPTER",Archive="04 / ARSIP SEJARAH",Settings="05 / PENGATURAN",Credits="06 / KREDIT"})[name] or ""
   self.view.panelTitle.Text=({Chapters="Tujuh perspektif",Archive="Koleksi sejarah",Settings="Preferensi permainan",Credits="Di balik cerita"})[name] or ""
+  self.view.panelFooter.Text=self.view.pageMeta[name] or ""
  end
  self.view:layout()
  self.animation:panel(name)

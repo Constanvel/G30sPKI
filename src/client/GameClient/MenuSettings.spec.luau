@@ -13,7 +13,7 @@ return function(player)
   check(view.settings.MasterSlider~=nil,"RED: volume harus memakai slider")
   view.gui.Enabled=true;view.pages.Settings.Visible=true;view.panel.Visible=true
   view.root.Size=UDim2.fromOffset(1000,600);task.wait(.1);view:layout();task.wait(.1)
-  check(view.panel.AbsoluteSize.X<=640 and view.panel.AbsoluteSize.Y<=500,"Panel settings harus kompak")
+  check(view.panel.AbsoluteSize.X<=640 and view.panel.AbsoluteSize.Y<=568,"Panel settings mengikuti konten dan batas area aman")
   check(view.content.AbsoluteSize.Y>=view.pages.Settings.AbsoluteSize.Y,"Desktop tidak perlu scroll settings")
   menu:updateSettings()
   for _,name in ipairs({"Master","Ambient","UI"}) do
