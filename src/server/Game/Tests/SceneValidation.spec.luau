@@ -2,7 +2,7 @@
 return function()
  local InteractionService=require(script.Parent.Parent.InteractionService)
  assert(type(InteractionService.sceneError)=="function","RED: validasi kelengkapan scene belum tersedia")
- local chapter={objectives={{id="profile"},{id="radio"},{id="context"}}}
+ local chapter={objectives={{id="document"},{id="radio"},{id="briefing"}}}
  local scene=Instance.new("Model")
  local markers={}
  for _,name in ipairs({"SpawnMarker","CameraStart","CameraEnd"}) do
@@ -24,12 +24,12 @@ return function()
    check(InteractionService.sceneError(scene,chapter)~=nil,"Marker bukan BasePart harus ditolak")
    wrong:Destroy();markers[name].Parent=scene
   end
-  for _,id in ipairs({"profile","radio","context"}) do
+  for _,id in ipairs({"document","radio","briefing"}) do
    local target=scene:FindFirstChild(id);target.Parent=nil
    check(InteractionService.sceneError(scene,chapter)~=nil,"Objek wajib hilang harus ditolak: "..id)
    target.Parent=scene
   end
-  local duplicate=scene.profile:Clone();duplicate.Parent=scene
+  local duplicate=scene.document:Clone();duplicate.Parent=scene
   check(InteractionService.sceneError(scene,chapter)~=nil,"ID interaksi ganda harus ditolak")
   duplicate:Destroy()
   return checks

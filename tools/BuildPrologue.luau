@@ -1,10 +1,13 @@
 --!strict
-assert(game.PlaceId == 97995024632294,"Hanya untuk target 1965: Tujuh Perspektif")
+assert(not game:GetService("RunService"):IsRunning(),"Jalankan dalam mode Edit")
 assert(not workspace:FindFirstChild("ActiveScene"),"ActiveScene sudah ada; tidak ditimpa")
 assert(not game.StarterGui:FindFirstChild("GameGui"),"GameGui sudah ada; tidak ditimpa")
+workspace:SetAttribute("ProjectId","enam-jam-1949")
+workspace:SetAttribute("ProjectTitle","ENAM JAM: 1949")
+game.Name="ENAM JAM: 1949"
 local scene = Instance.new("Model")
 scene.Name = "ActiveScene"
-scene:SetAttribute("VS01Generated",true)
+scene:SetAttribute("PrologGenerated",true)
 local function part(name,size,position,color,parent)
  local object=Instance.new("Part")
  object.Name=name; object.Size=size; object.Position=position
@@ -34,15 +37,15 @@ local function desk(name,x,z)
 end
 desk("ReadingDesk",-8,33)
 desk("RadioDesk",8,44)
-local card=part("ProfileCard",Vector3.new(3,0.2,2),Vector3.new(-8,3.4,-33),Color3.fromRGB(223,213,184))
+local card=part("HistoricalDocument",Vector3.new(3,0.2,2),Vector3.new(-8,3.4,-33),Color3.fromRGB(223,213,184))
 local radio=part("Radio",Vector3.new(4,2.5,2),Vector3.new(8,4.5,-44),wood)
 part("RadioFace",Vector3.new(3.5,1.7,0.1),Vector3.new(8,4.5,-42.96),Color3.fromRGB(43,43,39),radio)
-local board=part("ContextBoard",Vector3.new(8,5,0.3),Vector3.new(0,5.5,-58.9),Color3.fromRGB(49,61,54))
+local board=part("BriefingBoard",Vector3.new(8,5,0.3),Vector3.new(0,5.5,-58.9),Color3.fromRGB(49,61,54))
 local sign=Instance.new("SurfaceGui")
 sign.Face=Enum.NormalId.Back; sign.CanvasSize=Vector2.new(600,350); sign.Parent=board
 local boardText=Instance.new("TextLabel")
 boardText.Size=UDim2.fromScale(1,1); boardText.BackgroundTransparency=1
-boardText.Text="PAPAN KONTEKS\n\nPROTOTIPE TEKNIS\n\nFAKTA · KESAKSIAN · DRAMATISASI"
+boardText.Text="POS PERTEMUAN\n\nYOGYAKARTA 1949\n\nADAPTASI FIKSI"
 boardText.TextColor3=Color3.fromRGB(232,224,199); boardText.TextSize=30
 boardText.Font=Enum.Font.Gotham; boardText.TextWrapped=true; boardText.Parent=sign
 local function interact(object,id,title)
@@ -53,9 +56,9 @@ local function interact(object,id,title)
  prompt.HoldDuration=0; prompt.RequiresLineOfSight=true; prompt.ClickablePrompt=true
  prompt.Parent=object
 end
-interact(card,"profile","Kartu pengenalan")
-interact(radio,"radio","Radio placeholder")
-interact(board,"context","Papan konteks")
+interact(card,"document","Dokumen situasi")
+interact(radio,"radio","Radio pos komunikasi")
+interact(board,"briefing","Briefing regu")
 local function marker(name,cframe)
  local object=part(name,Vector3.new(1,1,1),cframe.Position,Color3.new())
  object.CFrame=cframe; object.Transparency=1; object.CanCollide=false; object.CanQuery=false; object.CanTouch=false
@@ -67,12 +70,13 @@ marker("CameraEnd",CFrame.lookAt(Vector3.new(-11,8,-52),Vector3.new(4,4,-39)))
 scene.Parent=workspace
 local scenes=game.ServerStorage:FindFirstChild("Scenes") or Instance.new("Folder")
 scenes.Name="Scenes"; scenes.Parent=game.ServerStorage
-assert(not scenes:FindFirstChild("AhmadYaniHouse"),"Template sudah ada; tidak ditimpa")
-local template=scene:Clone(); template.Name="AhmadYaniHouse"; template.Parent=scenes
+assert(not scenes:FindFirstChild("PrologueOutpost"),"Template sudah ada; tidak ditimpa")
+local template=scene:Clone(); template.Name="PrologueOutpost"; template.Parent=scenes
 local remotes=game.ReplicatedStorage:FindFirstChild("Remotes") or Instance.new("Folder")
 remotes.Name="Remotes"; remotes.Parent=game.ReplicatedStorage
 assert(not remotes:FindFirstChild("NarrativeEvent"),"Remote sudah ada; tidak ditimpa")
 local remote=Instance.new("RemoteEvent"); remote.Name="NarrativeEvent"; remote.Parent=remotes
+local lobbyRemote=Instance.new("RemoteEvent"); lobbyRemote.Name="LobbyEvent"; lobbyRemote.Parent=remotes
 
 local gui=Instance.new("ScreenGui")
 gui.Name="GameGui"; gui.Enabled=false; gui.ResetOnSpawn=false; gui.ScreenInsets=Enum.ScreenInsets.DeviceSafeInsets
@@ -92,15 +96,15 @@ header.Name="Header"; header.Size=UDim2.new(0.82,0,0,86); header.Position=UDim2.
 header.BackgroundColor3=paper; header.BorderSizePixel=0; header.Parent=gui
 header.Visible=false
 local headerLimit=Instance.new("UISizeConstraint"); headerLimit.MaxSize=Vector2.new(620,86); headerLimit.Parent=header
-label("Badge",header,UDim2.new(1,-24,0,18),UDim2.fromOffset(12,8),"VS01 · PROTOTIPE TEKNIS / DRAMATISASI",12)
+label("Badge",header,UDim2.new(1,-24,0,18),UDim2.fromOffset(12,8),"ENAM JAM: 1949 · PROLOG",12)
 label("Objective",header,UDim2.new(1,-24,0,46),UDim2.fromOffset(12,32),"Memuat objektif…",17)
 local cardGui=Instance.new("Frame")
 cardGui.Name="Card"; cardGui.AnchorPoint=Vector2.new(0.5,0.5)
 cardGui.Position=UDim2.fromScale(0.5,0.5); cardGui.Size=UDim2.fromScale(0.91,0.9)
 cardGui.BackgroundColor3=paper; cardGui.BorderSizePixel=0; cardGui.Parent=gui
 local cardLimit=Instance.new("UISizeConstraint"); cardLimit.MaxSize=Vector2.new(740,440); cardLimit.Parent=cardGui
-label("Title",cardGui,UDim2.new(1,-32,0,46),UDim2.fromOffset(16,12),"Memuat VS01…",23)
-label("Category",cardGui,UDim2.new(1,-32,0,20),UDim2.fromOffset(16,60),"DRAMATISASI · KONTEN UJI TEKNIS",12)
+label("Title",cardGui,UDim2.new(1,-32,0,46),UDim2.fromOffset(16,12),"Memuat ENAM JAM: 1949…",23)
+label("Category",cardGui,UDim2.new(1,-32,0,20),UDim2.fromOffset(16,60),"ADAPTASI FIKSI · PROTOTIPE PROLOG",12)
 local reading=Instance.new("ScrollingFrame")
 reading.Name="Reading"; reading.Position=UDim2.fromOffset(16,87); reading.Size=UDim2.new(1,-32,1,-155)
 reading.BackgroundTransparency=1; reading.BorderSizePixel=0; reading.ScrollBarThickness=5
@@ -125,4 +129,4 @@ local prompts=0
 for _,object in ipairs(scene:GetDescendants()) do if object:IsA("ProximityPrompt") then prompts+=1 end end
 assert(prompts==3 and scene.SpawnMarker and scene.CameraStart and scene.CameraEnd,"Scene tidak lengkap")
 assert(gui.Card.Advance.Size.Y.Offset>=44,"Target sentuh terlalu kecil")
-return "VS01 greybox, template, tiga prompt, marker, remote dan GameGui siap."
+return "Prolog greybox, template, tiga prompt, marker, remote dan GameGui siap."

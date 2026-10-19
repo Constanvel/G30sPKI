@@ -4,9 +4,9 @@ return function(player)
  local Camera=require(script.Parent.MenuCameraController)
  local camera=Camera.new(player)
  local original=workspace.CurrentCamera
- local before={fov=original.FieldOfView,time=game.Lighting.ClockTime,ambient=game.Lighting.Ambient,effects={}}
+ local before={fov=original.FieldOfView,effects={}}
  local restored={}
- for _,key in ipairs({"LightingStyle","EnvironmentDiffuseScale","EnvironmentSpecularScale","ShadowSoftness"}) do restored[key]=game.Lighting[key] end
+ for _,key in ipairs({"LightingStyle","ClockTime","Brightness","Ambient","OutdoorAmbient","FogColor","FogStart","FogEnd","ExposureCompensation","EnvironmentDiffuseScale","EnvironmentSpecularScale","ShadowSoftness"}) do restored[key]=game.Lighting[key] end
  for _,effect in ipairs(game.Lighting:GetChildren()) do
   if effect:IsA("Atmosphere") then before.effects[effect]={Density=effect.Density,Color=effect.Color,Haze=effect.Haze,Offset=effect.Offset,Decay=effect.Decay,Glare=effect.Glare}
   elseif effect:IsA("BloomEffect") then before.effects[effect]={Intensity=effect.Intensity,Threshold=effect.Threshold,Size=effect.Size}
@@ -27,6 +27,9 @@ return function(player)
   check(maxMove<.45 and maxAngle<.002,"Gerak dan rotasi tetap sangat kecil")
   check(Camera.sample(0)==CFrame.new(),"Kamera mulai tepat pada framing asli")
   check(camera:start(workspace.MenuEnvironment),"Kamera harus dapat dimulai")
+  check(game.Lighting.ClockTime>=5 and game.Lighting.ClockTime<6,"Menu harus berlatar menjelang fajar")
+  check(game.Lighting.FogStart>=50 and game.Lighting.FogEnd>=220,"Kabut tidak boleh menutupi fasad terdekat")
+  check(game.Lighting.Ambient.B>game.Lighting.Ambient.R,"Cahaya fajar harus tetap sejuk di luar lentera")
   local frame=camera.frame
   camera:start(workspace.MenuEnvironment)
   check(camera.frame==frame and #camera.lights==2,"Start berulang tidak menggandakan loop atau lampu")
@@ -57,7 +60,6 @@ return function(player)
  for _,object in ipairs(workspace.MenuEnvironment:GetDescendants()) do
   if object:IsA("PointLight") and object.Parent.Name=="NyalaLampu" then check(math.abs(object.Brightness-1.65)<.0001,"Brightness asli dipulihkan") end
  end
- check(game.Lighting.ClockTime==before.time and game.Lighting.Ambient==before.ambient,"Pencahayaan dipulihkan")
  for key,value in pairs(restored) do check(game.Lighting[key]==value,"Pengaturan rendering tidak dipulihkan: "..key) end
  for effect,properties in pairs(before.effects) do for property,value in pairs(properties) do check(effect[property]==value,"Efek gameplay tidak dipulihkan: "..property) end end
  return tostring(checks).." camera assertions PASS"

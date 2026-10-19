@@ -12,7 +12,7 @@ local Menu={}
 Menu.__index=Menu
 
 function Menu.new(player,request)
- local self=setmetatable({player=player,request=request,visible=false,pending=false,connections={},handlers={},requestId=0,
+ local self=setmetatable({player=player,request=request,visible=false,lobbyActive=false,pending=false,connections={},handlers={},requestId=0,
   volumes={Master=0.6,Ambient=0.5,UI=0.5},reduced=false},Menu)
  self.view=View.new(player); self.animation=Animation.new(self.view); self.camera=Camera.new(player)
  local ok,scene=pcall(Environment.create)
@@ -35,16 +35,16 @@ function Menu.new(player,request)
  table.insert(self.connections,player.PlayerGui.ChildAdded:Connect(function(child)
   if child.Name=="TouchGui" and child:IsA("ScreenGui") and self.visible then child.Enabled=false end
  end))
- bind(self.view.navigation.Start,function() self:send(if self.state.loading then "ready" else "start","vs01") end)
+ bind(self.view.navigation.Start,function() if self.state.loading then self:send("ready") else self:send("lobby","prolog") end end)
  bind(self.view.navigation.Resume,function() self:send("resume") end)
  for _,name in ipairs({"Chapters","Archive","Settings","Credits"}) do bind(self.view.navigation[name],function() self:openPanel(name) end) end
  bind(self.view.back,function() self:openPanel(nil) end)
- bind(self.view.chapterStart,function() self:send("start","vs01") end)
+ bind(self.view.chapterStart,function() self:send("lobby","prolog") end)
  for _,name in ipairs({"Master","Ambient","UI"}) do
   local slider=self.view.settings[name.."Slider"]
   bind(slider,function() end)
   table.insert(self.connections,slider.InputBegan:Connect(function(input)
-   if not self.visible or self.pending or self.panelName~="Settings" or self.drag then return end
+   if not self.visible or self.lobbyActive or self.pending or self.panelName~="Settings" or self.drag then return end
    if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
     self.drag={slider=slider,input=input};self:updateSliderInput(slider,input.Position.X)
    end
@@ -74,7 +74,7 @@ function Menu.new(player,request)
   self.camera:setReduced(self.reduced); self:updateSettings()
  end)
  ContextActionService:BindActionAtPriority("MainMenuNavigation",function(_,input,key)
-  if not self.visible then return Enum.ContextActionResult.Pass end
+  if not self.visible or self.lobbyActive then return Enum.ContextActionResult.Pass end
   if input~=Enum.UserInputState.Begin then return Enum.ContextActionResult.Sink end
   if key.KeyCode==Enum.KeyCode.Escape or key.KeyCode==Enum.KeyCode.ButtonB then
    if self.panelName then self:openPanel(nil) end
@@ -98,7 +98,7 @@ function Menu.new(player,request)
 end
 
 function Menu:activate(button)
- if not self.visible or self.pending or not button or button:GetAttribute("Available")==false then return end
+ if not self.visible or self.lobbyActive or self.pending or not button or button:GetAttribute("Available")==false then return end
  if not table.find(self:focusable(),button) then return end
  if self.handlers[button] then
   self.animation:press(button)
@@ -108,6 +108,7 @@ end
 
 function Menu:focusable()
  local list={}
+ if self.lobbyActive then return list end
  if not self.panelName then
   for _,name in ipairs(self.view.order) do local b=self.view.navigation[name]; if b:GetAttribute("Available")~=false then table.insert(list,b) end end
  else
@@ -148,14 +149,14 @@ function Menu:setVolume(name,value)
 end
 
 function Menu:updateSliderInput(slider,x)
- if not self.visible or self.pending or self.panelName~="Settings" then return end
+ if not self.visible or self.lobbyActive or self.pending or self.panelName~="Settings" then return end
  local name=slider:GetAttribute("SettingName")
  local track=slider.Track
  if name and track.AbsoluteSize.X>0 then self:setVolume(name,(x-track.AbsolutePosition.X)/track.AbsoluteSize.X) end
 end
 
 function Menu:stepSlider(button,direction)
- if not self.visible or self.pending or self.panelName~="Settings" or not button then return false end
+ if not self.visible or self.lobbyActive or self.pending or self.panelName~="Settings" or not button then return false end
  local name=button:GetAttribute("SettingName")
  if not name or not self.volumes[name] then return false end
  self:setVolume(name,self.volumes[name]+direction*.1)
@@ -163,14 +164,14 @@ function Menu:stepSlider(button,direction)
 end
 
 function Menu:openPanel(name)
- if self.pending then return end
+ if self.pending or self.lobbyActive then return end
  self.drag=nil
  self.panelName=name; self.view.gui:SetAttribute("Panel",name or "Main")
  if name then for page,frame in pairs(self.view.pages) do frame.Visible=page==name end end
  self.view.content.CanvasPosition=Vector2.zero
  if name then
   self.view.eyebrow.Text=({Chapters="03 / PILIH CHAPTER",Archive="04 / ARSIP SEJARAH",Settings="05 / PENGATURAN",Credits="06 / KREDIT"})[name] or ""
-  self.view.panelTitle.Text=({Chapters="Tujuh perspektif",Archive="Koleksi sejarah",Settings="Preferensi permainan",Credits="Di balik cerita"})[name] or ""
+  self.view.panelTitle.Text=({Chapters="Kampanye ENAM JAM",Archive="Koleksi sejarah",Settings="Preferensi permainan",Credits="Di balik cerita"})[name] or ""
   self.view.panelFooter.Text=self.view.pageMeta[name] or ""
  end
  self.view:layout()
@@ -180,10 +181,10 @@ function Menu:openPanel(name)
 end
 
 function Menu:send(action,chapterId)
- if self.pending then return end
+ if self.pending or self.lobbyActive then return end
  self.pending=true; self.requestId+=1; local token=self.requestId
  self.view.gui:SetAttribute("Pending",true)
- self.view.status.Text="Menghubungkan ke chapter…"
+ self.view.status.Text=if action=="lobby" then "Menyiapkan lobi prolog…" else "Menghubungkan ke permainan…"
  self.animation:tween(self.view.overlay,0.15,{BackgroundTransparency=0})
  local ok,sent=pcall(self.request,action,chapterId)
  if not ok or not sent then self:requestFailed("Koneksi belum tersedia. Pilih Mulai untuk mencoba lagi."); return end
@@ -216,7 +217,7 @@ function Menu:show(state)
  self.view.navigation.Start.Text=if state.loading then "COBA HUBUNGKAN" else "MULAI"
  self.view.status.Text=if state.loading then "Menunggu server. Anda tetap dapat membuka panel menu."
   elseif state.hasCheckpoint then "Checkpoint sesi: objektif "..tostring(state.checkpointIndex).." / 3."
-  else "Tujuh perspektif. Satu rangkaian sejarah."
+  else "Satu kota. Empat peran. Kabar untuk dunia."
  if self.visible then self.animation:tween(self.view.overlay,0.15,{BackgroundTransparency=1}); return end
  self.visible=true; self.panelName=nil; self.view.gui.Enabled=true; self.view.gui.Shade.Visible=true; self.view.gui:SetAttribute("Panel","Main")
  self.view:layout()
@@ -226,7 +227,7 @@ end
 
 function Menu:hide()
  if not self.visible then return end
- self.visible=false; self.pending=false; self.drag=nil;self.requestId+=1; local token=self.requestId
+ self.visible=false; self.lobbyActive=false; self.pending=false; self.drag=nil;self.requestId+=1; local token=self.requestId
  self.camera:stop(); self.animation:cancel()
  if GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(self.view.gui) then GuiService.SelectedObject=nil end
  self.view.root.Visible=false; self.view.panel.Visible=false
@@ -235,6 +236,20 @@ function Menu:hide()
  task.delay(0.26,function()
   if token==self.requestId then self.view.gui.Enabled=false; self.view.gui.Shade.Visible=true end
  end)
+end
+
+function Menu:setLobbyActive(active)
+ active=active==true
+ if (self.lobbyActive==true)==active then return end
+ self.lobbyActive=active;self.pending=false;self.drag=nil;self.requestId+=1
+ self.view.gui:SetAttribute("Pending",false);self.view.gui:SetAttribute("LobbyActive",self.lobbyActive)
+ self.animation:cancel()
+ self.view.root.GroupTransparency=0
+ self.view.root.Visible=self.visible and not self.lobbyActive
+ self.view.panel.Visible=false;self.panelName=nil
+ self.view.gui:SetAttribute("Panel",if self.lobbyActive then "Lobby" else "Main")
+ if GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(self.view.gui) then GuiService.SelectedObject=nil end
+ if self.visible and not self.lobbyActive then self.view:layout() end
 end
 
 function Menu:isVisible() return self.visible end

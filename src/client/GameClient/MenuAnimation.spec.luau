@@ -36,9 +36,9 @@ return function()
   check(view.selectionMarker.Position==target.Position+UDim2.fromOffset(30,22),"Input cepat harus berakhir pada indikator terakhir")
   check(not b:GetAttribute("Highlighted") and target:GetAttribute("Highlighted"),"Satu baris aktif setelah pergantian pilihan")
   view.root.Size=UDim2.fromOffset(314,348);task.wait(.12)
-  local navSize=view.nav.AbsoluteSize
+  local oldColumn=target.Position.X.Offset
   view.root.Size=UDim2.fromOffset(300,238);task.wait(.12)
-  check(navSize==view.nav.AbsoluteSize and view.selectionMarker.Position==target.Position+UDim2.fromOffset(30,22),"Indikator mengikuti perubahan kolom meski ukuran nav sama")
+  check(target.Position.X.Offset~=oldColumn and view.selectionMarker.Position==target.Position+UDim2.fromOffset(30,22),"Indikator mengikuti pergantian kolom pada viewport pendek")
   view.root.Size=UDim2.fromScale(1,1);task.wait(.05)
   animation:press(target);task.wait(.05)
   check(target.BackgroundTransparency<.72,"Klik memberi respons segera")

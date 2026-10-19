@@ -1,0 +1,161 @@
+{
+  "project": "ENAM JAM: 1949",
+  "date": "2026-10-19",
+  "scope": [
+    "FPS movement",
+    "camera",
+    "visible body",
+    "procedural animation"
+  ],
+  "studioModeAfter": "Edit",
+  "sourceSync": {
+    "normalization": "CRLF to LF, UTF-8 bytes, rolling hash 31 modulo 2147483647",
+    "files": {
+      "src/server/Game/Bootstrap.server.luau": {
+        "bytes": 7176,
+        "hash": 1871541723
+      },
+      "src/shared/Shared/Shared/MovementCollision.luau": {
+        "bytes": 2213,
+        "hash": 599740789
+      },
+      "src/client/GameClient/FirstPersonBody.luau": {
+        "bytes": 5182,
+        "hash": 283570780
+      },
+      "src/server/Game/MovementService.luau": {
+        "bytes": 10454,
+        "hash": 2108797534
+      },
+      "src/client/GameClient/MovementController.spec.luau": {
+        "bytes": 6890,
+        "hash": 2012769569
+      },
+      "src/shared/Shared/Shared/MovementConfig.luau": {
+        "bytes": 1007,
+        "hash": 2002997654
+      },
+      "src/client/GameClient/Bootstrap.local.luau": {
+        "bytes": 7292,
+        "hash": 1019550578
+      },
+      "src/client/GameClient/FirstPersonBody.spec.luau": {
+        "bytes": 3369,
+        "hash": 55373142
+      },
+      "src/server/Game/Tests/MovementState.spec.luau": {
+        "bytes": 9420,
+        "hash": 1352623075
+      },
+      "src/shared/Shared/Shared/MovementState.luau": {
+        "bytes": 3967,
+        "hash": 1478370878
+      },
+      "src/client/GameClient/MovementController.luau": {
+        "bytes": 17776,
+        "hash": 293645201
+      },
+      "src/server/Game/Tests/MovementCollision.spec.luau": {
+        "bytes": 2585,
+        "hash": 1383377327
+      },
+      "src/server/Game/Tests/MovementValidation.spec.luau": {
+        "bytes": 6156,
+        "hash": 567601485
+      }
+    },
+    "match": true
+  },
+  "fpsSuites": [
+    {
+      "name": "MovementState.spec",
+      "assertions": 125,
+      "status": "PASS",
+      "context": "native Server"
+    },
+    {
+      "name": "MovementValidation.spec",
+      "assertions": 50,
+      "status": "PASS",
+      "context": "native Server"
+    },
+    {
+      "name": "MovementCollision.spec",
+      "assertions": 14,
+      "status": "PASS",
+      "context": "native Server, generated R6/R15 rigs"
+    },
+    {
+      "name": "MovementController.spec",
+      "assertions": 25,
+      "status": "PASS",
+      "context": "native Client, final source"
+    },
+    {
+      "name": "FirstPersonBody.spec",
+      "assertions": 30,
+      "status": "PASS",
+      "context": "native Client, generated R6/R15 rigs"
+    }
+  ],
+  "fpsAssertions": 244,
+  "regressionSuites": [
+    {
+      "name": "Lobby.spec (server)",
+      "assertions": 36,
+      "status": "PASS"
+    },
+    {
+      "name": "SceneValidation.spec",
+      "assertions": 12,
+      "status": "PASS"
+    },
+    {
+      "name": "Lobby.spec (client)",
+      "assertions": 225,
+      "status": "PASS"
+    },
+    {
+      "name": "AvatarPreview.spec",
+      "assertions": 248,
+      "status": "PASS"
+    }
+  ],
+  "regressionAssertions": 521,
+  "playChecks": [
+    "WASD actual displacement: W 700ms moved from Z -25 to -34.2997, speed and velocity 13; release converged Idle and velocity zero",
+    "12-degree ramp: root climbed to Y 5.023, Z -42.309; returned down ramp",
+    "Sprint to slide: local/server Sliding, speed 16.976 during deceleration; HipHeight .9",
+    "Slide recovery to crouch; corrected crouch knee/hip/ankle pose keeps foot centers near .71-.80",
+    "Low ceiling: local/server Crouching, HipHeight .9; head/camera below roof; stand/jump blocked",
+    "Wall fixture: character stayed before wall, no penetration",
+    "Jump sampled at Y 6.959, upward velocity 13.273; Space held then returned Idle Y3.5, no repeated jump",
+    "Respawn: local/server Idle, FPSEnabled true, LockFirstPerson, head hidden and arm visible",
+    "MENU: FPSEnabled false, Classic camera, head visible, cursor Default, no LocalMovementState attribute",
+    "Visible hands in front and torso/feet when looking down, inspected native captures",
+    "Final Edit: zero temporary QA scripts/geometries, StarterGui.GameGui.Enabled false"
+  ],
+  "performance": {
+    "measurement": "physics plus camera callback CPU only; one client in prototype scene; not whole frame time",
+    "frames": 1200,
+    "seconds": 39.911023784428835,
+    "p50ms": 0.39089999972929945,
+    "p95ms": 0.6003000003147463,
+    "maxms": 1.3278999995236518
+  },
+  "harness": "Temporary Play-only LocalScripts for virtual window focus and deterministic pitch; some phase transitions use valid remotes. Removed by Stop. Production suspend path covered separately in specs.",
+  "limitations": [
+    "No actual 2/4-client session",
+    "No real latency injection",
+    "No physical keyboard/mouse feel evaluation",
+    "No fixed rendered 30/120 FPS test; state simulation only",
+    "No hours-long soak",
+    "No custom authored FPS animation assets or foot IK",
+    "Existing appearance false retained; extreme avatar bundles not all tested"
+  ],
+  "publication": {
+    "commit": false,
+    "push": false,
+    "publish": false
+  }
+}

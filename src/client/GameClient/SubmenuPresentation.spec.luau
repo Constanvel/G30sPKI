@@ -14,6 +14,9 @@ return function(player)
  local ok,message=pcall(function()
   check(view.panelFooter~=nil,"RED: submenu memerlukan footer terpadu")
   check(view.chapterStart.Emphasis.ApplyStrokeMode==Enum.ApplyStrokeMode.Border,"Sorotan fokus mengikuti bingkai chapter")
+  check(#view.chapterRows==5 and view.chapterStart.Name=="Prolog","Kampanye hanya membuka prolog teknis")
+  check(#view.archiveCards>0 and #view.archiveCards<=3,"Arsip ringkas menampilkan maksimal tiga fakta bersumber")
+  for _,card in ipairs(view.archiveCards) do check(card.Source.Text:find("Sumber: ",1,true)==1,"Fakta harus memiliki atribusi sumber") end
   for _,name in ipairs({"Master","Ambient","UI"}) do
    local slider=view.settings[name.."Slider"]
    check(slider.NextSelectionLeft==slider and slider.NextSelectionRight==slider,"Panah slider tidak memindahkan fokus: "..name)

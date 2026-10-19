@@ -32,6 +32,11 @@ return function(player)
   check(not menu:stepSlider(view.settings.MasterSlider,1),"Panel tersembunyi tidak boleh menerima panah volume")
   menu:updateSliderInput(view.settings.MasterSlider,0)
   check(menu.volumes.Master==.5,"Drag tidak boleh mengubah panel tersembunyi")
+  menu.panelName="Settings";menu.lobbyActive=true
+  check(not menu:stepSlider(view.settings.MasterSlider,1),"Lobi menyerahkan panah kepada navigasi lobi")
+  menu:updateSliderInput(view.settings.MasterSlider,0)
+  check(menu.volumes.Master==.5,"Lobi membatalkan perubahan slider menu")
+  menu.lobbyActive=false
   menu.reduced=true;menu:updateSettings();task.wait(.2)
   check(view.settings.Motion:GetAttribute("On")==true and view.settings.Motion.State.Text=="Aktif","Toggle wajib memiliki state terbaca")
   view.root.Size=UDim2.fromOffset(360,560);task.wait(.1);view:layout();task.wait(.1)
