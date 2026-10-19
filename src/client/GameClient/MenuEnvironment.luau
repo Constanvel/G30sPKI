@@ -1,97 +1,145 @@
 --!strict
-local MenuEnvironment = {}
+local AssetService=game:GetService("AssetService")
+local assets=require(script.Parent.MenuAssetData)
+local MenuEnvironment={}
+local templates={}
+local origin=Vector3.new(1000,128,0)
+
+local function decorate(object)
+ object.Anchored=true; object.CanCollide=false; object.CanTouch=false; object.CanQuery=false
+ object.CastShadow=true
+end
+
+local function template(name)
+ if templates[name] then return templates[name] end
+ local model=Instance.new("Model"); model.Name=name
+ local ok,message=pcall(function()
+  for _,row in ipairs(assets[name].parts) do
+   local object
+   if row.mesh then
+    object=AssetService:CreateMeshPartAsync(Content.fromUri(row.mesh),{CollisionFidelity=Enum.CollisionFidelity.Box,RenderFidelity=Enum.RenderFidelity.Automatic})
+    object.TextureID=row.texture; object.DoubleSided=row.doubleSided
+   else object=Instance.new("Part") end
+   object.Name=row.name; object.Size=Vector3.new(unpack(row.size)); object.CFrame=CFrame.new(unpack(row.cf))
+   object.Color=Color3.new(unpack(row.color)); object.Material=Enum.Material[row.material]
+   object.Transparency=row.transparency; decorate(object)
+   if row.surface then
+    local surface=Instance.new("SurfaceAppearance")
+    for key,value in pairs(row.surface) do surface[key]=if key=="AlphaMode" then Enum.AlphaMode[value] else value end
+    surface.Parent=object
+   end
+   object.Parent=model
+  end
+ end)
+ if not ok then model:Destroy(); error("Menu asset "..name..": "..tostring(message)) end
+ model.WorldPivot=CFrame.identity
+ templates[name]=model
+ return model
+end
 
 function MenuEnvironment.create()
- local scene = Instance.new("Model")
- scene.Name = "MenuEnvironment"
- scene:SetAttribute("ArtisticReconstruction",true)
- local origin = Vector3.new(1000,0,0)
- local function part(name,size,position,color,material)
-  local p=Instance.new("Part")
-  p.Name=name; p.Size=size; p.Position=origin+position
-  p.Anchored=true; p.CanCollide=false; p.CanTouch=false
-  p.CanQuery=false; p.CastShadow=false; p.Material=material or Enum.Material.SmoothPlastic
-  p.Color=color; p.TopSurface=Enum.SurfaceType.Smooth; p.BottomSurface=Enum.SurfaceType.Smooth
-  p.Parent=scene; return p
+ -- Load reusable geometry before parenting a scene; failed assets leave no partial world.
+ local pending,failures=6,{}
+ for _,name in ipairs({"Tree","Cottage","TimberHut","Fence","Lantern","Crate"}) do
+  task.spawn(function()
+   local ok,message=pcall(template,name)
+   if not ok then table.insert(failures,tostring(message)) end
+   pending-=1
+  end)
  end
- local plaster=Color3.fromRGB(119,120,105)
- local roof=Color3.fromRGB(71,48,39)
- local wood=Color3.fromRGB(38,39,34)
- local warm=Color3.fromRGB(205,161,99)
- part("Ground",Vector3.new(200,1,420),Vector3.new(0,-0.7,-85),Color3.fromRGB(26,36,31))
- part("Street",Vector3.new(19,0.2,380),Vector3.new(0,0,-75),Color3.fromRGB(53,59,59))
- for _,side in ipairs({-1,1}) do
-  part("Gutter",Vector3.new(1.5,0.1,380),Vector3.new(side*10,0.1,-75),Color3.fromRGB(19,25,24))
-  part("Footpath",Vector3.new(4,0.4,360),Vector3.new(side*12.5,0.2,-75),Color3.fromRGB(69,68,58))
+ while pending>0 do task.wait() end
+ assert(#failures==0,table.concat(failures,"; "))
+ local scene=Instance.new("Model"); scene.Name="MenuEnvironment"
+ scene:SetAttribute("Location","Lubang Buaya"); scene:SetAttribute("ArtisticReconstruction",true)
+ scene:SetAttribute("VisualRevision","BARA-mesh-01")
+ local function part(name,size,position,color,material,parent)
+  local p=Instance.new("Part"); p.Name=name; p.Size=size; p.Position=origin+position
+  p.Color=color; p.Material=material; p.TopSurface=Enum.SurfaceType.Smooth; p.BottomSurface=Enum.SurfaceType.Smooth
+  decorate(p); p.Parent=parent or scene
+  return p
  end
- local function house(x,z,shade)
-  part("PlasterHouse",Vector3.new(20,9,20),Vector3.new(x,4.8,z),shade)
-  for _,sign in ipairs({-1,1}) do
-   local tile=part("TileRoof",Vector3.new(12.5,0.8,24),Vector3.new(x+sign*5.5,11.3,z),roof)
-   tile.CFrame*=CFrame.Angles(0,0,math.rad(-sign*23))
+ local function fitted(name,label,position,height,yaw)
+  local m=templates[name]:Clone(); m.Name=label
+  local scale=height/assets[name].size[2]
+  m:ScaleTo(scale); m:PivotTo(CFrame.new(origin+position+Vector3.new(0,height/2,0))*CFrame.Angles(0,math.rad(yaw or 0),0))
+  m.Parent=scene
+  return m
+ end
+ local ground=Color3.fromRGB(74,78,54)
+ local soil=Color3.fromRGB(106,94,72)
+ local groundMarker=part("Ground",Vector3.new(250,3,310),Vector3.new(0,-1.6,-75),ground,Enum.Material.Ground)
+ groundMarker.Transparency=1
+ -- A hidden marker keeps the scene contract; the visible path is blended Terrain.
+ local path=part("DirtPath",Vector3.one,Vector3.new(8,-2,0),soil,Enum.Material.Ground)
+ path.Transparency=1
+ local random=Random.new(1965)
+ fitted("Cottage","TimberHut",Vector3.new(30,0,-28),12,188)
+ fitted("TimberHut","FieldShelter",Vector3.new(-25,0,-64),10.2,-12)
+ fitted("Crate","TimberCrate",Vector3.new(23,0,-18),1.4,18)
+ fitted("Crate","TimberCrate",Vector3.new(24.6,0,-18.4),1.1,-8)
+ for i=0,3 do fitted("Fence","TimberFence",Vector3.new(34+i*3.2,0,-13),2.5,0) end
+ for i=0,3 do fitted("Fence","TimberFence",Vector3.new(46.5,0,-16-i*3.2),2.5,90) end
+
+ local zone=Instance.new("Model"); zone.Name="WellZone"; zone.Parent=scene; zone:SetAttribute("ArtisticHint",true)
+ local center=Vector3.new(18,0,-13)
+ local inside=part("WellInterior",Vector3.new(.1,3.5,3.5),center+Vector3.new(0,-.02,0),Color3.fromRGB(12,15,14),Enum.Material.Slate,zone)
+ inside.Shape=Enum.PartType.Cylinder; inside.CFrame*=CFrame.Angles(0,0,math.pi/2)
+ for row=0,1 do for i=0,23 do
+  local a=(i+row*.5)*math.pi/12
+  local rim=part("MasonryRim",Vector3.new(.4,.33,.5),center+Vector3.new(math.cos(a)*1.9,.16+row*.33,math.sin(a)*1.9),Color3.fromRGB(106+i%3*4,101+i%3*3,87),Enum.Material.Brick,zone)
+  rim.CFrame*=CFrame.Angles(0,-a,0)
+ end end
+
+ for i,e in ipairs({{-22,-13,26},{-36,-39,30},{49,-6,28},{52,-43,32},{-5,-55,25},{13,-65,28},{35,-63,27},{-38,-83,28},{-12,-92,30},{18,-99,32},{47,-101,29},{69,-77,32},{-55,-5,27},{65,20,28}}) do
+  fitted("Tree","BroadleafTree",Vector3.new(e[1],-.2,e[2]),e[3],i*43)
+ end
+ for i=1,38 do
+  local z=random:NextNumber(-55,30)
+  local side=if i%2==0 then 1 else -1
+  local x=8+side*random:NextNumber(7,25)
+  local rock=part("ScatteredStone",Vector3.new(random:NextNumber(.25,.7),random:NextNumber(.12,.35),random:NextNumber(.3,.85)),Vector3.new(x,.01,z),Color3.fromRGB(99,99,83),Enum.Material.Slate)
+  rock.Shape=Enum.PartType.Ball;rock.CFrame*=CFrame.Angles(0,random:NextNumber(0,math.pi),.1)
+ end
+ for _,p in ipairs({Vector3.new(13,0,-2),Vector3.new(34,0,-19)}) do
+  local lamp=fitted("Lantern","OilLantern",p,5.5,0)
+  local glow=lamp:FindFirstChild("NyalaLampu",true)
+  assert(glow,"Lentera BARA kehilangan nyala")
+  local light=Instance.new("PointLight");light.Color=Color3.fromRGB(255,207,143)
+  light.Brightness=1.65;light.Range=22;light.Shadows=false;light.Parent=glow
+ end
+ local anchor=part("CameraAnchor",Vector3.one,Vector3.new(2,6.6,27),Color3.new(),Enum.Material.SmoothPlastic)
+ anchor.Transparency=1;anchor.CastShadow=false
+ anchor.CFrame=CFrame.lookAt(origin+Vector3.new(2,6.6,27),origin+Vector3.new(11,5.4,-27))
+ local terrain=workspace.Terrain
+ local region=Region3.new(origin+Vector3.new(-120,-16,-172),origin+Vector3.new(120,36,76)):ExpandToGrid(4)
+ local oldMaterials,oldOccupancy=terrain:ReadVoxels(region,4)
+ local materials,occupancy={},{}
+ local minimum=region.CFrame.Position-region.Size/2
+ for x=1,region.Size.X/4 do
+  materials[x]={};occupancy[x]={}
+  for y=1,region.Size.Y/4 do
+   materials[x][y]={};occupancy[x][y]={}
+   for z=1,region.Size.Z/4 do
+    local px=minimum.X+(x-.5)*4-origin.X
+    local pz=minimum.Z+(z-.5)*4-origin.Z
+    local py=minimum.Y+(y-1)*4
+    local side=math.max(math.abs(px)-48,0)
+    local back=math.max(-pz-66,0)
+    -- Terrain interpolates its surface half a voxel above the occupancy transition.
+    local height=origin.Y-2+math.noise(px*.035,pz*.035)*.7+math.min(26,side*side*.009+back*back*.003)
+    local roadX=6+math.sin((37-pz)/2.15*.075)*9
+    local clearing=((px-25)/25)^2+((pz+24)/25)^2<1
+    local distantGrass=pz< -48 and math.noise(px*.12,pz*.12)>.12
+    occupancy[x][y][z]=math.clamp((height-py)/4,0,1)
+    materials[x][y][z]=if occupancy[x][y][z]==0 then Enum.Material.Air elseif math.abs(px-roadX)<5 or clearing then Enum.Material.Ground elseif distantGrass then Enum.Material.Grass else Enum.Material.LeafyGrass
+   end
   end
-  part("RoofRidge",Vector3.new(0.8,0.8,24),Vector3.new(x,13.6,z),roof)
-  local face=x-math.sign(x)*10.1
-  part("WoodDoor",Vector3.new(0.2,6.5,3.2),Vector3.new(face,3.5,z),wood)
-  for _,dz in ipairs({-6,6}) do
-   part("WindowFrame",Vector3.new(0.35,4,4.2),Vector3.new(face,5.3,z+dz),wood)
-   part("WindowLight",Vector3.new(0.38,3.2,3.4),Vector3.new(face,5.3,z+dz),warm,Enum.Material.Neon)
-   part("WindowCross",Vector3.new(0.4,3.4,0.18),Vector3.new(face,5.3,z+dz),wood)
-   part("WindowCross",Vector3.new(0.4,0.18,3.5),Vector3.new(face,5.3,z+dz),wood)
-  end
-  local fenceX=x-math.sign(x)*13
-  for dz=-13,13,2.6 do part("FencePicket",Vector3.new(0.35,2.8,0.7),Vector3.new(fenceX,1.7,z+dz),wood) end
-  part("FenceRail",Vector3.new(0.4,0.3,28),Vector3.new(fenceX,2.2,z),wood)
+  if x%10==0 then task.wait() end
  end
- house(28,2,plaster)
- house(28,-38,Color3.fromRGB(106,115,106))
- house(-28,-20,Color3.fromRGB(126,120,104))
- house(-28,-67,Color3.fromRGB(96,107,101))
- for _,x in ipairs({-28,28}) do
-  part("DistantHouse",Vector3.new(20,7,18),Vector3.new(x,3.8,-112),Color3.fromRGB(65,78,78))
-  for _,side in ipairs({-1,1}) do
-   local tile=part("DistantRoof",Vector3.new(12,0.7,21),Vector3.new(x+side*5.3,9.5,-112),Color3.fromRGB(55,49,46))
-   tile.CFrame*=CFrame.Angles(0,0,math.rad(-side*23))
-  end
- end
- part("PorchStep",Vector3.new(3,0.35,6),Vector3.new(16.6,0.45,2),Color3.fromRGB(90,91,80))
- part("TimberBenchSeat",Vector3.new(1.6,0.25,5),Vector3.new(16.7,1.5,7),wood)
- part("TimberBenchBack",Vector3.new(0.2,1.1,5),Vector3.new(17.3,2.05,7),wood)
- for _,z in ipairs({5.1,8.9}) do part("BenchLeg",Vector3.new(1.2,1.2,0.3),Vector3.new(16.7,0.85,z),wood) end
- for _,z in ipairs({-6,12}) do
-  local pot=part("ClayPlanter",Vector3.new(1.6,1.5,1.5),Vector3.new(16.8,1.1,z),Color3.fromRGB(112,76,57))
-  pot.Shape=Enum.PartType.Cylinder; pot.CFrame*=CFrame.Angles(0,0,math.pi/2)
-  for i=-1,1 do
-   local leaf=part("PlanterLeaf",Vector3.new(0.18,2,0.55),Vector3.new(16.8+i*0.35,2.25,z),Color3.fromRGB(45,70,48))
-   leaf.CFrame*=CFrame.Angles(0,math.rad(i*40),math.rad(i*28))
-  end
- end
- for _,z in ipairs({-4,-54}) do part("TimberUtilityPole",Vector3.new(0.35,13,0.35),Vector3.new(-14,6.7,z),wood) end
- local cablePoints={Vector3.new(-14,13.2,-4),Vector3.new(-14,12.3,-21),Vector3.new(-14,12.3,-37),Vector3.new(-14,13.2,-54)}
- for i=1,#cablePoints-1 do
-  local a,b=cablePoints[i],cablePoints[i+1]
-  local cable=part("OverheadCable",Vector3.new(0.06,0.06,(b-a).Magnitude),(a+b)/2,wood)
-  cable.CFrame=CFrame.lookAt(origin+(a+b)/2,origin+b)
- end
- for _,z in ipairs({20,-25,-70}) do
-  local side=if z==-25 then -1 else 1
-  local x=side*13
-  part("StreetLamp",Vector3.new(0.4,13,0.4),Vector3.new(x,6.7,z),wood)
-  part("LampArm",Vector3.new(3.5,0.3,0.35),Vector3.new(x-side*1.5,13,z),wood)
-  local bulb=part("WarmLamp",Vector3.new(1.2,0.25,0.8),Vector3.new(x-side*3,12.7,z),warm,Enum.Material.Neon)
-  local light=Instance.new("PointLight")
-  light.Color=warm; light.Brightness=1.1; light.Range=28; light.Shadows=false; light.Parent=bulb
- end
- for _,position in ipairs({Vector3.new(18,0,30),Vector3.new(-19,0,-42),Vector3.new(22,0,-82)}) do
-  part("TreeTrunk",Vector3.new(1.4,14,1.4),position+Vector3.new(0,7,0),wood)
-  for i=1,3 do
-   local leaf=part("AngularCanopy",Vector3.new(11,5,10),position+Vector3.new((i-2)*3,13+i*1.8,0),Color3.fromRGB(24+i*3,39+i*2,31))
-   leaf.CFrame*=CFrame.Angles(0,math.rad(i*24),math.rad(i*8))
-  end
- end
- local anchor=part("CameraAnchor",Vector3.one,Vector3.new(5,6.7,42),Color3.new())
- anchor.Transparency=1
- anchor.CFrame=CFrame.lookAt(origin+Vector3.new(5,6.7,42),origin+Vector3.new(5,5,-38))
+ -- The isolated client region is restored exactly when the decorative scene is destroyed.
+ scene.Destroying:Connect(function() terrain:WriteVoxels(region,4,oldMaterials,oldOccupancy) end)
+ local ok,message=pcall(function() terrain:WriteVoxels(region,4,materials,occupancy) end)
+ if not ok then scene:Destroy();error(message) end
  scene.Parent=workspace
  return scene
 end

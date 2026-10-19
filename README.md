@@ -2,7 +2,11 @@
 
 Prototipe game edukasi sejarah di Roblox Studio. Versi VS01 menyediakan satu ruangan greybox, tiga interaksi berurutan, panel narasi, cutscene kamera, dan ulang demo.
 
-Menu utama sinematik menambahkan jalan perumahan malam low-poly, kamera bergerak halus, enam navigasi, checkpoint sesi, pengaturan volume/reduced motion, dan kredit. Arsip serta chapter yang belum tersedia ditandai secara jelas. Rincian implementasi dan batas pengujian ada di [laporan menu](docs/MAIN_MENU_RESULT.md).
+Menu utama sinematik menampilkan latar artistik Lubang Buaya dengan mesh bertekstur dari proyek BARA 1946, Terrain lokal, kamera bergerak halus, enam navigasi, checkpoint sesi, pengaturan volume/reduced motion, dan kredit. Arsip serta chapter yang belum tersedia ditandai secara jelas. Perubahan terbaru dan batas pengujian ada di [laporan latar 3D](docs/REALISTIC_MENU_RESULT.md).
+
+UI menu kini memakai desain editorial arsip, panel sesuai panjang isi, slider volume dan toggle aksesibilitas. Rincian desain serta QA tersedia pada [laporan UI](docs/EDITORIAL_UI_RESULT.md); pass ini tidak mengubah latar, lighting, kamera atau gameplay.
+
+Polish animasi menambahkan intro bertahap, indikator navigasi bergerak, transisi panel yang dapat dialihkan, kamera bersiklus 28 detik dan variasi lembut pada dua lentera. Hasil pengujian serta batas performanya ada di [laporan animasi](docs/MENU_MOTION_RESULT.md).
 
 Naskah dan aset masih placeholder teknis. Akurasi sejarah, input ponsel fisik, performa, dan kelayakan publikasi belum disahkan. Hasil pengujian tercatat di [laporan VS01](docs/VS01_RESULT.md).
 
@@ -25,6 +29,8 @@ Pada workspace pengembangan yang Script Sync-nya aktif, buka checkpoint lokal `b
 Berkas RBXL dan folder backups diabaikan Git. Clone repositori berisi source dan dokumentasi; map, GUI, serta konfigurasi Script Sync lokal tidak otomatis dipulihkan oleh Git. Builder menyimpan resep greybox/UI, tetapi bukan pengganti penuh checkpoint place dan menolak overwrite scene yang sudah ada.
 
 UI dan lingkungan menu dibuat lokal dari source saat Play, sehingga tidak memerlukan model menu tersimpan di place. Tidak ada DataStore atau audio berizin yang dipasang; volume mengatur SoundGroup menu untuk integrasi audio berikutnya.
+
+Mesh dan tekstur diunduh dari URI dalam `MenuAssetData.luau`; cache dingin memerlukan koneksi ke Roblox. Tidak perlu mengimpor model/script dari Creator Store. Saat memulihkan checkpoint lama, jalankan isi `tools/ConfigureMenuRenderer.luau` sekali melalui Command Bar mode Edit lalu simpan place untuk memakai renderer Realistic. Pengaturan Studio ini tidak dicakup Script Sync. Terrain menu dibuat hanya pada client, jauh di atas greybox; region tersebut dipulihkan ketika scene dibersihkan.
 
 ## Git dan Studio
 

@@ -3,15 +3,22 @@ local RunService=game:GetService("RunService")
 local Lighting=game:GetService("Lighting")
 local MenuCameraController={}
 MenuCameraController.__index=MenuCameraController
-local properties={ClockTime=0.3,Brightness=1.5,Ambient=Color3.fromRGB(88,101,118),OutdoorAmbient=Color3.fromRGB(75,88,105),FogColor=Color3.fromRGB(45,58,70),FogStart=45,FogEnd=205,ExposureCompensation=0.08}
+local properties={ClockTime=0.3,Brightness=1.8,Ambient=Color3.fromRGB(68,80,94),OutdoorAmbient=Color3.fromRGB(82,96,111),FogColor=Color3.fromRGB(48,59,61),FogStart=45,FogEnd=205,ExposureCompensation=0.12,EnvironmentDiffuseScale=0.65,EnvironmentSpecularScale=0.35,ShadowSoftness=0.5}
 local effects={
- Atmosphere={Density=0.23,Offset=0.05,Color=Color3.fromRGB(151,170,186),Decay=Color3.fromRGB(62,77,92),Haze=1.2,Glare=0},
+ Atmosphere={Density=0.24,Offset=0.05,Color=Color3.fromRGB(137,151,158),Decay=Color3.fromRGB(56,69,69),Haze=1.6,Glare=0},
  BloomEffect={Intensity=0.12,Threshold=2.3,Size=12},
  SunRaysEffect={Enabled=false},
 }
 
 function MenuCameraController.new(player)
- return setmetatable({player=player,reduced=false,time=0},MenuCameraController)
+ return setmetatable({player=player,reduced=false,time=0,lights={}},MenuCameraController)
+end
+
+function MenuCameraController.sample(time)
+ local phase=time*math.pi*2/28
+ local ease=math.sin(math.min(time/1.2,1)*math.pi/2)^2
+ return CFrame.new(math.sin(phase)*.38*ease,math.sin(phase*2)*.06*ease,(1-math.cos(phase))*.1*ease)
+  *CFrame.Angles(math.sin(phase*2)*.0004*ease,math.sin(phase)*.0015*ease,0)
 end
 
 function MenuCameraController:refresh()
@@ -28,8 +35,11 @@ function MenuCameraController:setReduced(reduced)
   self.frame=RunService.RenderStepped:Connect(function(dt)
    self.time+=dt
    local camera=workspace.CurrentCamera
-   self.pose=self.base*CFrame.new(math.sin(self.time*0.13)*0.45,math.sin(self.time*0.17)*0.12,0)*CFrame.Angles(0,math.sin(self.time*0.1)*0.004,0)
+   self.pose=self.base*MenuCameraController.sample(self.time)
    if camera then camera.CFrame=self.pose end
+   for i,light in ipairs(self.lights) do
+    if light.instance.Parent then light.instance.Brightness=light.brightness*(1+.018*math.sin(self.time*math.pi*2/10+(i-1)*math.pi)) end
+   end
   end)
  end
 end
@@ -49,8 +59,13 @@ function MenuCameraController:start(scene)
  end
  local marker=scene and scene:FindFirstChild("CameraAnchor")
  local valid=marker and marker:IsA("BasePart")
- self.base=if valid then marker.CFrame else CFrame.lookAt(Vector3.new(1005,6.7,42),Vector3.new(1005,5,-38))
+ self.base=if valid then marker.CFrame else CFrame.lookAt(Vector3.new(1005,135.2,40),Vector3.new(1010,130.3,-30))
  self.time=0; self.pose=self.base
+ if scene then
+  for _,object in ipairs(scene:GetDescendants()) do
+   if object:IsA("PointLight") and object.Parent.Name=="NyalaLampu" then table.insert(self.lights,{instance=object,brightness=object.Brightness}) end
+  end
+ end
  self.active=true
  self:refresh()
  self:setReduced(self.reduced)
@@ -67,6 +82,8 @@ function MenuCameraController:stop()
  for effect,original in pairs(self.saved.effects) do
   if effect.Parent then for property,value in pairs(original) do effect[property]=value end end
  end
+ for _,light in ipairs(self.lights) do if light.instance.Parent then light.instance.Brightness=light.brightness end end
+ table.clear(self.lights)
  local camera=workspace.CurrentCamera
  if camera then
   camera.CameraType=Enum.CameraType.Custom; camera.FieldOfView=self.saved.fov
