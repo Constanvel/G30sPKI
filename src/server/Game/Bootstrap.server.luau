@@ -6,6 +6,7 @@ local config=require(RS.Shared.GameConfig)
 local ChapterService=require(script.Parent.ChapterService)
 local InteractionService=require(script.Parent.InteractionService)
 local LobbyService=require(script.Parent.LobbyService)
+local MovementService=require(script.Parent.MovementService)
 local service=ChapterService.new(chapter)
 local lobby=LobbyService.new(config)
 local remotes=RS:WaitForChild("Remotes",10)
@@ -16,19 +17,15 @@ if not remote or not remote:IsA("RemoteEvent") or not lobbyRemote or not lobbyRe
  warn("ENAM JAM: remote belum lengkap");return
 end
 local scene=workspace:FindFirstChild("ActiveScene")
-local movement,lastRequest={},{}
+local movement=MovementService.new(function(player)
+ local state=service:snapshot(player)
+ return state~=nil and state.phase=="exploring"
+end)
+local lastRequest={}
 local function sendState(player)
  local state=service:snapshot(player)
  if not state then return end
- local humanoid=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
- local defaults=movement[player]
- if humanoid and defaults then
-  local enabled=state.phase=="exploring" or state.phase=="error"
-  humanoid.WalkSpeed=if enabled then defaults.speed else 0
-  humanoid.JumpPower=if enabled then defaults.power else 0
-  humanoid.JumpHeight=if enabled then defaults.height else 0
-  humanoid.AutoRotate=enabled
- end
+ movement:setEnabled(player,state.phase=="exploring" or state.phase=="error")
  remote:FireClient(player,state)
 end
 local function broadcastLobby(notice)
@@ -69,8 +66,9 @@ end
 local function onCharacter(player,character)
  local root=character:WaitForChild("HumanoidRootPart",10)
  local humanoid=character:WaitForChild("Humanoid",10)
- if not root or not humanoid or player.Character~=character then return end
- movement[player]={speed=humanoid.WalkSpeed,power=humanoid.JumpPower,height=humanoid.JumpHeight}
+ local head=character:WaitForChild("Head",10)
+ if not root or not humanoid or not head or player.Character~=character then return end
+ movement:bindCharacter(player,character)
  local previous=service:snapshot(player)
  if not previous then
   service:reset(player);service:enterMenu(player,service:snapshot(player).revision)
@@ -78,7 +76,7 @@ local function onCharacter(player,character)
   -- Respawn rejoins the live party progress, without resetting teammates.
   service:enterMenu(player,previous.revision);service:resume(player,service:snapshot(player).revision)
  end
- if not invalid(player) then character:PivotTo(scene.SpawnMarker.CFrame) end
+ if not invalid(player) then movement:teleport(player,scene.SpawnMarker.CFrame) end
  publish()
 end
 local function onPlayer(player)
@@ -88,7 +86,7 @@ end
 Players.PlayerAdded:Connect(onPlayer)
 for _,player in ipairs(Players:GetPlayers()) do onPlayer(player) end
 Players.PlayerRemoving:Connect(function(player)
- service:remove(player);lobby:remove(player);movement[player]=nil;lastRequest[player]=nil;timers[player]=nil
+ service:remove(player);lobby:remove(player);movement:remove(player);lastRequest[player]=nil;timers[player]=nil
  broadcastLobby()
 end)
 local function allowed(player)
@@ -130,7 +128,7 @@ lobbyRemote.OnServerEvent:Connect(function(player,action,revision,value)
  end
  if action=="launch" then
   service:startParty(lobby:players())
-  for _,member in ipairs(lobby:players()) do member.Character:PivotTo(scene.SpawnMarker.CFrame) end
+  for _,member in ipairs(lobby:players()) do movement:teleport(member,scene.SpawnMarker.CFrame) end
   publish()
  elseif action=="leave" then
   -- Leaving the waiting room also leaves its previous shared mission.

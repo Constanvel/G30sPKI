@@ -13,6 +13,7 @@ local NarrativeController = require(script.Parent.NarrativeController)
 local cinematic = CinematicController.new(player)
 local remote
 local state
+local movement
 local lobbyRemote
 local LobbyController=require(script.Parent.LobbyController)
 local lobby=LobbyController.new(player,function(action,revision,value)
@@ -46,6 +47,11 @@ if not remote or not lobbyRemote or not lobbyRemote:IsA("RemoteEvent") then
  menu:requestFailed("Koneksi game belum siap. Periksa penyiapan, lalu mulai ulang Play.")
  return
 end
+local movementRemote=remoteFolder:WaitForChild("MovementEvent",10)
+if not movementRemote or not movementRemote:IsA("RemoteEvent") then
+ menu:requestFailed("Kontrol movement belum siap. Mulai ulang Play.");return
+end
+movement=require(script.Parent.MovementController).new(player,movementRemote)
 local menuButton=Instance.new("TextButton")
 menuButton.Name="OpenMenu"; menuButton.Size=UDim2.fromOffset(88,44); menuButton.Position=UDim2.new(1,-100,0,12)
 menuButton.Text="MENU"; menuButton.Font=Enum.Font.GothamMedium; menuButton.TextSize=14
@@ -62,6 +68,7 @@ local function render(nextState)
   return
  end
  state = nextState
+ if state.phase~="exploring" then movement:setEnabled(false) end
  cinematic:cancel()
  if fadeTween then fadeTween:Cancel(); fadeTween=nil end
  gui.Fade.BackgroundTransparency = 1
@@ -69,6 +76,7 @@ local function render(nextState)
  gui.Enabled=state.phase~="menu"
  if state.phase=="menu" then menu:show(state)
  else lobby:hide();menu:setLobbyActive(false);menu:hide() end
+ if state.phase=="exploring" then movement:setEnabled(true,menu.reduced) end
  local scene = workspace:FindFirstChild("ActiveScene")
  for _,object in ipairs(if scene then scene:GetDescendants() else {}) do
   if object:IsA("ProximityPrompt") then
