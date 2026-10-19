@@ -59,6 +59,9 @@ function View.new(player)
   index.TextColor3=Style.secondary;index.Font=Enum.Font.RobotoMono
   self.navigation[name]=b
  end
+ self.selectionMarker=rule(nav,"SelectionMarker",UDim2.fromOffset(30,22),UDim2.fromOffset(2,24))
+ self.selectionMarker.AnchorPoint=Vector2.new(0,.5);self.selectionMarker.BackgroundColor3=Style.accent
+ self.selectionMarker.BackgroundTransparency=1;self.selectionMarker.ZIndex=2
  self.resumeNote=text(self.navigation.Resume,"StateNote","Belum ada",UDim2.fromOffset(82,16),UDim2.new(1,-90,.5,-7),11)
  self.resumeNote.TextColor3=Style.secondary;self.resumeNote.TextXAlignment=Enum.TextXAlignment.Right
  self.meta=text(root,"Meta","VS01 · PROTOTIPE / LATAR ARTISTIK",UDim2.new(1,-60,0,18),UDim2.new(),10);self.meta.TextColor3=Style.secondary

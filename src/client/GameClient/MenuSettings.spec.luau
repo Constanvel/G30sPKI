@@ -49,7 +49,7 @@ return function(player)
    end
   end
  end)
- animation:cancel();view.resize:Disconnect();view.gui:Destroy()
+ animation:destroy();view.resize:Disconnect();view.gui:Destroy()
  assert(ok,message)
  return tostring(count).." settings assertions PASS"
 end

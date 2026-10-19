@@ -101,7 +101,7 @@ function Menu:activate(button)
  if not self.visible or self.pending or not button or button:GetAttribute("Available")==false then return end
  if not table.find(self:focusable(),button) then return end
  if self.handlers[button] then
-  self.animation:feedback(button,true)
+  self.animation:press(button)
   self.handlers[button]()
  end
 end
@@ -239,7 +239,7 @@ end
 function Menu:isVisible() return self.visible end
 function Menu:refreshCamera() self.camera:refresh() end
 function Menu:destroy()
- self.visible=false; self.drag=nil;self.requestId+=1; self.camera:stop(); self.animation:cancel()
+ self.visible=false; self.drag=nil;self.requestId+=1; self.camera:stop(); self.animation:destroy()
  ContextActionService:UnbindAction("MainMenuNavigation")
  for _,connection in ipairs(self.connections) do connection:Disconnect() end
  self.view.resize:Disconnect(); self.view.gui:Destroy()

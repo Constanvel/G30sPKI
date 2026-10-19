@@ -3,7 +3,13 @@ local TweenService=game:GetService("TweenService")
 local Style=require(script.Parent.MenuStyle)
 local Animation={}
 Animation.__index=Animation
-function Animation.new(view) return setmetatable({view=view,tweens={},targets={},generation=0,reduced=false},Animation) end
+function Animation.new(view)
+ local self=setmetatable({view=view,tweens={},targets={},generation=0,reduced=false},Animation)
+ self.resize=view.root:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+  self:later(0,function() self:marker(self.selectedNav or view.navigation.Start,true) end)
+ end)
+ return self
+end
 
 function Animation:tween(object,duration,values)
  local targets=self.targets[object]
@@ -19,88 +25,132 @@ function Animation:tween(object,duration,values)
  tween:Play(); return tween
 end
 
-function Animation:cancel()
+function Animation:later(delay,callback)
+ local token=self.generation
+ task.delay(delay,function() if token==self.generation then callback() end end)
+end
+
+function Animation:marker(button,snap)
+ if not button or button:GetAttribute("Available")==false then button=self.view.navigation.Start end
+ local line=self.view.selectionMarker
+ self:tween(line,if snap or self.reduced then 0 else .24,{Position=button.Position+UDim2.fromOffset(30,22)})
+ if not snap then self:tween(line,if self.reduced then .08 else .18,{BackgroundTransparency=0}) end
+end
+
+function Animation:cancel(keepPose)
  self.generation+=1
  local active={}
  for tween in pairs(self.tweens) do table.insert(active,tween) end
  for _,tween in ipairs(active) do tween:Cancel() end
  table.clear(self.tweens); table.clear(self.targets)
- self.view.overlay.BackgroundTransparency=1
- self.view.brand.GroupTransparency=0
- if self.view.brandPadding then self.view.brandPadding.PaddingTop=UDim.new() end
- self.view.meta.TextTransparency=0
- for _,button in pairs(self.view.navigation) do
-  button.TextTransparency=0
-  local padding=button:FindFirstChildOfClass("UIPadding")
-  if padding then padding.PaddingLeft=UDim.new(0,button:GetAttribute("RestPadding") or 12) end
+ local view=self.view
+ view.overlay.BackgroundTransparency=1; view.brand.GroupTransparency=0
+ view.brandPadding.PaddingTop=UDim.new(); view.meta.TextTransparency=0
+ for _,label in ipairs({view.kicker,view.year,view.subtitle,view.status}) do label.TextTransparency=0 end
+ view.brandRule.BackgroundTransparency=0
+ view.selectionMarker.BackgroundTransparency=0
+ for _,button in pairs(view.navigation) do
+  button.TextTransparency=0; button.Index.TextTransparency=0
+  local note=button:FindFirstChild("StateNote");if note then note.TextTransparency=0 end
+  button.Indicator.BackgroundTransparency=1
+  button:FindFirstChildOfClass("UIPadding").PaddingLeft=UDim.new(0,button:GetAttribute("RestPadding")+(if button:GetAttribute("Highlighted") and not self.reduced then 4 else 0))
  end
+ if not keepPose then view.root.Position=UDim2.new(); view.panel.Position=UDim2.fromScale(.5,.5) end
 end
 
 function Animation:intro()
  self:cancel()
- local view,token=self.view,self.generation
+ local view=self.view
  view.root.Visible=true; view.root.GroupTransparency=0; view.panel.Visible=false
  view.overlay.BackgroundTransparency=0
- self:tween(view.overlay,if self.reduced then 0.08 else 0.6,{BackgroundTransparency=1})
- if self.reduced then return end
- view.brand.GroupTransparency=1; view.meta.TextTransparency=1
- if view.brandPadding then view.brandPadding.PaddingTop=UDim.new(0,6); self:tween(view.brandPadding,0.7,{PaddingTop=UDim.new()}) end
- self:tween(view.brand,0.7,{GroupTransparency=0})
+ self:tween(view.overlay,if self.reduced then .08 else .85,{BackgroundTransparency=1})
+ self.selectedNav=nil
+ for _,button in pairs(view.navigation) do self:feedback(button,false) end
+ self:marker(view.navigation.Start,true)
+ if self.reduced then self:marker(view.navigation.Start,false);return end
+ view.selectionMarker.BackgroundTransparency=1
+ for _,label in ipairs({view.kicker,view.year,view.subtitle,view.status}) do label.TextTransparency=1 end
+ view.brandRule.BackgroundTransparency=1;view.meta.TextTransparency=1
+ view.brandPadding.PaddingTop=UDim.new(0,8)
+ self:later(.16,function() self:tween(view.year,.75,{TextTransparency=0});self:tween(view.brandPadding,.75,{PaddingTop=UDim.new()}) end)
+ self:later(.25,function() self:tween(view.kicker,.4,{TextTransparency=0}) end)
+ self:later(.38,function() self:tween(view.subtitle,.48,{TextTransparency=0}) end)
+ self:later(.48,function() self:tween(view.status,.48,{TextTransparency=0}) end)
+ self:later(.6,function() self:tween(view.brandRule,.4,{BackgroundTransparency=0}) end)
  for i,name in ipairs(view.order) do
-  local button=view.navigation[name]; button.TextTransparency=1
-  local padding=button:FindFirstChildOfClass("UIPadding")
-  local rest=button:GetAttribute("RestPadding") or 12
-  if padding then padding.PaddingLeft=UDim.new(0,rest-4) end
-  task.delay(0.12+i*0.055,function()
-   if token==self.generation then
-    self:tween(button,0.28,{TextTransparency=0})
-    if padding then self:tween(padding,0.28,{PaddingLeft=UDim.new(0,rest+(if button:GetAttribute("Highlighted") then 4 else 0))}) end
-   end
+  local button=view.navigation[name]
+  button.TextTransparency=1;button.Index.TextTransparency=1
+  local note=button:FindFirstChild("StateNote");if note then note.TextTransparency=1 end
+  local padding=button:FindFirstChildOfClass("UIPadding");local rest=button:GetAttribute("RestPadding")
+  padding.PaddingLeft=UDim.new(0,rest-4)
+  self:later(.6+(i-1)*.075,function()
+   self:tween(button,.24,{TextTransparency=0});self:tween(button.Index,.24,{TextTransparency=0})
+   if note then self:tween(note,.24,{TextTransparency=0}) end
+   self:tween(padding,.24,{PaddingLeft=UDim.new(0,rest+(if button:GetAttribute("Highlighted") then 4 else 0))})
   end)
  end
- task.delay(0.6,function() if token==self.generation then self:tween(view.meta,0.4,{TextTransparency=0}) end end)
+ self:later(.95,function() self:tween(view.meta,.3,{TextTransparency=0}) end)
+ self:later(1.05,function() self:marker(self.selectedNav or view.navigation.Start,false) end)
 end
 
 function Animation:panel(name)
- self:cancel()
- local view,token=self.view,self.generation
+ self:cancel(true)
+ local view=self.view
  local opening=name~=nil
  local incoming=if opening then view.panel else view.root
  local outgoing=if view.root.Visible then view.root elseif view.panel.Visible then view.panel else nil
- view.root.Position=UDim2.new(); view.panel.Position=UDim2.fromScale(0.5,0.5)
+ local target=if opening then UDim2.fromScale(.5,.5) else UDim2.new()
  local function reveal()
-  if token~=self.generation then return end
   view.root.Visible=not opening; view.panel.Visible=opening
-  incoming.GroupTransparency=1
-  local target=incoming.Position
-  if not self.reduced then incoming.Position=target+UDim2.fromOffset(8,0) end
-  self:tween(incoming,if self.reduced then 0.08 else 0.22,{GroupTransparency=0,Position=target})
+  if incoming~=outgoing then
+   incoming.GroupTransparency=1
+   incoming.Position=target+(if self.reduced then UDim2.new() else UDim2.fromOffset(0,8))
+  end
+  self:tween(incoming,if self.reduced then .08 else .24,{GroupTransparency=0,Position=target})
  end
  if outgoing and outgoing~=incoming then
-  local duration=if self.reduced then 0.04 else 0.1
-  self:tween(outgoing,duration,{GroupTransparency=1})
-  task.delay(duration,reveal)
+  local duration=if self.reduced then .04 else .1
+  self:tween(outgoing,duration,{GroupTransparency=1});self:later(duration,reveal)
  else reveal() end
 end
 
 function Animation:feedback(button,selected)
  local available=button:GetAttribute("Available")~=false
- button:SetAttribute("Highlighted",selected and available)
  local highlighted=selected and available
+ button:SetAttribute("Highlighted",highlighted)
  local slider=button:GetAttribute("SettingName")~=nil
- self:tween(button,0.14,{BackgroundTransparency=if highlighted and not slider then 0.72 else 1,TextColor3=if not available then Style.muted else Style.text})
+ self:tween(button,.18,{BackgroundTransparency=if highlighted and not slider then .72 else 1,TextColor3=if not available then Style.muted elseif highlighted then Style.text else Style.text:Lerp(Style.secondary,.18)})
  if slider then
-  self:tween(button.Track.Handle.FocusRing,0.14,{Transparency=if highlighted then 0 else 1})
-  self:tween(button.Track.Handle,0.14,{BackgroundColor3=if highlighted then Style.accent else Style.text})
+  self:tween(button.Track.Handle.FocusRing,.18,{Transparency=if highlighted then 0 else 1})
+  self:tween(button.Track.Handle,.18,{BackgroundColor3=if highlighted then Style.accent else Style.text})
   return
  end
  local padding=button:FindFirstChildOfClass("UIPadding")
  local rest=button:GetAttribute("RestPadding") or 12
- if padding then self:tween(padding,0.14,{PaddingLeft=UDim.new(0,rest+(if highlighted and not self.reduced and not button:GetAttribute("FixedText") then 4 else 0))}) end
+ if padding then self:tween(padding,.18,{PaddingLeft=UDim.new(0,rest+(if highlighted and not self.reduced and not button:GetAttribute("FixedText") then 4 else 0))}) end
  local index=button:FindFirstChild("Index")
- if index then self:tween(index,0.14,{TextColor3=if highlighted then Style.accentText else Style.secondary}) end
- local line=button:FindFirstChild("Indicator")
- if line then self:tween(line,0.16,{BackgroundTransparency=if selected and available then 0 else 1,Size=UDim2.fromOffset(2,if selected and available then 24 else 10)}) end
+ if index then self:tween(index,.18,{TextColor3=if highlighted then Style.accentText else Style.secondary}) end
+ if button.Parent==self.view.nav then
+  if highlighted then
+   local previous=self.selectedNav;self.selectedNav=button
+   if previous and previous~=button then self:feedback(previous,false) end
+   self:marker(button,false)
+  elseif self.selectedNav==button and not available then self.selectedNav=nil;self:marker(self.view.navigation.Start,false) end
+ else
+  local line=button:FindFirstChild("Indicator")
+  if line then self:tween(line,.18,{BackgroundTransparency=if highlighted then 0 else 1,Size=UDim2.fromOffset(2,if highlighted then 24 else 10)}) end
+ end
+end
+
+function Animation:press(button)
+ self:feedback(button,true)
+ if button:GetAttribute("SettingName") then return end
+ self:tween(button,.09,{BackgroundTransparency=.52})
+ self:later(.1,function() self:feedback(button,button:GetAttribute("Highlighted")==true) end)
+end
+
+function Animation:destroy()
+ self:cancel();self.resize:Disconnect()
 end
 
 return Animation

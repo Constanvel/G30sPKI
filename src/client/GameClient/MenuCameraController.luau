@@ -11,7 +11,14 @@ local effects={
 }
 
 function MenuCameraController.new(player)
- return setmetatable({player=player,reduced=false,time=0},MenuCameraController)
+ return setmetatable({player=player,reduced=false,time=0,lights={}},MenuCameraController)
+end
+
+function MenuCameraController.sample(time)
+ local phase=time*math.pi*2/28
+ local ease=math.sin(math.min(time/1.2,1)*math.pi/2)^2
+ return CFrame.new(math.sin(phase)*.38*ease,math.sin(phase*2)*.06*ease,(1-math.cos(phase))*.1*ease)
+  *CFrame.Angles(math.sin(phase*2)*.0004*ease,math.sin(phase)*.0015*ease,0)
 end
 
 function MenuCameraController:refresh()
@@ -28,8 +35,11 @@ function MenuCameraController:setReduced(reduced)
   self.frame=RunService.RenderStepped:Connect(function(dt)
    self.time+=dt
    local camera=workspace.CurrentCamera
-   self.pose=self.base*CFrame.new(math.sin(self.time*0.13)*0.45,math.sin(self.time*0.17)*0.12,0)*CFrame.Angles(0,math.sin(self.time*0.1)*0.004,0)
+   self.pose=self.base*MenuCameraController.sample(self.time)
    if camera then camera.CFrame=self.pose end
+   for i,light in ipairs(self.lights) do
+    if light.instance.Parent then light.instance.Brightness=light.brightness*(1+.018*math.sin(self.time*math.pi*2/10+(i-1)*math.pi)) end
+   end
   end)
  end
 end
@@ -51,6 +61,11 @@ function MenuCameraController:start(scene)
  local valid=marker and marker:IsA("BasePart")
  self.base=if valid then marker.CFrame else CFrame.lookAt(Vector3.new(1005,135.2,40),Vector3.new(1010,130.3,-30))
  self.time=0; self.pose=self.base
+ if scene then
+  for _,object in ipairs(scene:GetDescendants()) do
+   if object:IsA("PointLight") and object.Parent.Name=="NyalaLampu" then table.insert(self.lights,{instance=object,brightness=object.Brightness}) end
+  end
+ end
  self.active=true
  self:refresh()
  self:setReduced(self.reduced)
@@ -67,6 +82,8 @@ function MenuCameraController:stop()
  for effect,original in pairs(self.saved.effects) do
   if effect.Parent then for property,value in pairs(original) do effect[property]=value end end
  end
+ for _,light in ipairs(self.lights) do if light.instance.Parent then light.instance.Brightness=light.brightness end end
+ table.clear(self.lights)
  local camera=workspace.CurrentCamera
  if camera then
   camera.CameraType=Enum.CameraType.Custom; camera.FieldOfView=self.saved.fov

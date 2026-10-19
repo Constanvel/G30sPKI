@@ -8,7 +8,7 @@ return function(player)
  local view={gui=gui,back=gui.Panel.Back,chapterStart=gui.Panel.Content.Chapters.VS01,navigation={},settings={},order={"Start","Resume","Chapters","Archive","Settings","Credits"}}
  for _,name in ipairs(view.order) do view.navigation[name]=gui.Root.Navigation[name] end
  for _,name in ipairs({"MasterSlider","AmbientSlider","UISlider","Motion"}) do view.settings[name]=gui.Panel.Content.Settings[name] end
- local menu=setmetatable({visible=true,pending=false,panelName="Archive",view=view,handlers={[view.navigation.Start]=function() fired+=1 end},animation={feedback=function() end}},Menu)
+ local menu=setmetatable({visible=true,pending=false,panelName="Archive",view=view,handlers={[view.navigation.Start]=function() fired+=1 end},animation={press=function() end}},Menu)
  local ok,message=pcall(function()
   game.GuiService.SelectedObject=nil
   assert(menu:selection()==view.back,"Panel tanpa fokus harus memilih Kembali")

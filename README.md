@@ -6,6 +6,8 @@ Menu utama sinematik menampilkan latar artistik Lubang Buaya dengan mesh berteks
 
 UI menu kini memakai desain editorial arsip, panel sesuai panjang isi, slider volume dan toggle aksesibilitas. Rincian desain serta QA tersedia pada [laporan UI](docs/EDITORIAL_UI_RESULT.md); pass ini tidak mengubah latar, lighting, kamera atau gameplay.
 
+Polish animasi menambahkan intro bertahap, indikator navigasi bergerak, transisi panel yang dapat dialihkan, kamera bersiklus 28 detik dan variasi lembut pada dua lentera. Hasil pengujian serta batas performanya ada di [laporan animasi](docs/MENU_MOTION_RESULT.md).
+
 Naskah dan aset masih placeholder teknis. Akurasi sejarah, input ponsel fisik, performa, dan kelayakan publikasi belum disahkan. Hasil pengujian tercatat di [laporan VS01](docs/VS01_RESULT.md).
 
 ## Struktur
