@@ -3,12 +3,12 @@ local RunService=game:GetService("RunService")
 local Lighting=game:GetService("Lighting")
 local MenuCameraController={}
 MenuCameraController.__index=MenuCameraController
-local properties={ClockTime=6.65,GeographicLatitude=-7.8,Brightness=3,Ambient=Color3.fromRGB(146,129,105),OutdoorAmbient=Color3.fromRGB(166,146,116),FogColor=Color3.fromRGB(225,193,143),FogStart=90,FogEnd=325,ExposureCompensation=.28,EnvironmentDiffuseScale=.7,EnvironmentSpecularScale=.18,ShadowSoftness=.65}
+local properties={ClockTime=7.05,GeographicLatitude=-7.8,Brightness=2.7,Ambient=Color3.fromRGB(127,132,137),OutdoorAmbient=Color3.fromRGB(155,151,138),FogColor=Color3.fromRGB(221,209,183),FogStart=90,FogEnd=360,ExposureCompensation=.12,EnvironmentDiffuseScale=.85,EnvironmentSpecularScale=.22,ShadowSoftness=.8}
 local effects={
- Atmosphere={Density=.28,Offset=.12,Color=Color3.fromRGB(255,222,176),Decay=Color3.fromRGB(190,150,96),Haze=2.1,Glare=.08},
+ Atmosphere={Density=.24,Offset=.12,Color=Color3.fromRGB(249,229,196),Decay=Color3.fromRGB(174,181,183),Haze=1.6,Glare=.08},
  BloomEffect={Intensity=.07,Threshold=2.5,Size=16},
- ColorCorrectionEffect={TintColor=Color3.fromRGB(255,224,181),Contrast=.035,Saturation=-.03,Brightness=.025},
- Sky={SunAngularSize=6},
+ ColorCorrectionEffect={TintColor=Color3.fromRGB(255,246,229),Contrast=.045,Saturation=-.03,Brightness=.025},
+ Sky={SunAngularSize=4},
  DepthOfFieldEffect={Enabled=false},
  SunRaysEffect={Enabled=false},
 }
@@ -72,7 +72,7 @@ function MenuCameraController:start(scene)
  local found={}
  for _,effect in ipairs(Lighting:GetChildren()) do
   local overrides=effects[effect.ClassName]
-  if overrides then
+  if overrides and not (effect:IsA("ColorCorrectionEffect") and not effect.Enabled)then
    found[effect.ClassName]=true
    local original={}; self.saved.effects[effect]=original
    for property,value in pairs(overrides) do original[property]=effect[property]; effect[property]=value end
@@ -99,6 +99,11 @@ function MenuCameraController:start(scene)
   end
  end
  self.active=true
+ -- Initial Lighting replication can arrive after this client-built scene.
+ self.lighting=Lighting.Changed:Connect(function(property)
+  local value=properties[property]
+  if self.active and value~=nil and Lighting[property]~=value then Lighting[property]=value end
+ end)
  self:refresh()
  self:setReduced(self.reduced)
  self.character=self.player.CharacterAdded:Connect(function() task.defer(function() self:refresh() end) end)
@@ -109,7 +114,7 @@ end
 function MenuCameraController:stop()
  if not self.active then return end
  self.active=false
- for _,key in ipairs({"frame","character","changed","viewport"}) do if self[key] then self[key]:Disconnect(); self[key]=nil end end
+ for _,key in ipairs({"frame","character","changed","viewport","lighting"}) do if self[key] then self[key]:Disconnect(); self[key]=nil end end
  self.viewportCamera=nil
  for property,value in pairs(self.saved.lighting) do Lighting[property]=value end
  for effect,original in pairs(self.saved.effects) do

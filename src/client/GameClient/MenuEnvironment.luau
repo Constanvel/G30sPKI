@@ -34,10 +34,10 @@ end
 function Environment.create()
  local scene=Instance.new("Model");scene.Name="MenuEnvironment"
  scene:SetAttribute("Location","Yogyakarta, 1 Maret 1949");scene:SetAttribute("ArtisticReconstruction",true)
- scene:SetAttribute("VisualRevision","YOGYAKARTA-SUNRISE-02");scene:SetAttribute("MenuFOV",52)
+ scene:SetAttribute("VisualRevision","YOGYAKARTA-REALISM-03");scene:SetAttribute("MenuFOV",52)
  local function group(name,parent)local m=Instance.new("Model");m.Name=name;m.Parent=parent or scene;return m end
  local street=group("Street");local west=group("WestFrontages");local east=group("EastFrontages")
- local props=group("StreetProps");local greenery=group("Greenery");local distance=group("DistantCity");local fighters=group("Fighters")
+ local props=group("StreetProps");local greenery=group("Greenery");local distance=group("DistantCity")
  local function part(parent,name,size,cf,color,material,shape)
   local p=Instance.new("Part");p.Name=name;p.Size=size;p.CFrame=CFrame.new(origin)*cf
   p.Color=color;p.Material=material or Enum.Material.SmoothPlastic;if shape then p.Shape=shape end
@@ -59,9 +59,9 @@ function Environment.create()
   p:SetAttribute("MenuMotionAmplitude",amplitude);p:SetAttribute("MenuMotionPhase",phase);p:SetAttribute("MenuMotionSpeed",speed)
  end
  part(street,"Ground",Vector3.new(240,2,340),CFrame.new(8,-1,-75),Color3.fromRGB(112,107,85),Enum.Material.Ground)
- part(street,"MainRoad",Vector3.new(36,.16,242),CFrame.new(8,.03,-69),Color3.fromRGB(132,119,94),Enum.Material.Cobblestone)
+ part(street,"MainRoad",Vector3.new(36,.16,242),CFrame.new(8,.03,-69),Color3.fromRGB(112,107,96),Enum.Material.Asphalt)
  local random=Random.new(1949)
- for i=1,62 do
+ for i=1,24 do
   local x=random:NextNumber(-8,24);local z=random:NextNumber(-178,45)
   part(street,"RoadAggregate",Vector3.new(random:NextNumber(.1,.45),.035,random:NextNumber(.2,.6)),CFrame.new(x,.135,z)*CFrame.Angles(0,random:NextNumber(0,6),0),Color3.fromRGB(118+i%4*4,108+i%3*4,87+i%5*3),Enum.Material.Slate).CastShadow=false
  end
@@ -71,23 +71,36 @@ function Environment.create()
   part(street,"Drain",Vector3.new(.42,.035,240),CFrame.new(inner,.13,-69),Color3.fromRGB(67,67,57),Enum.Material.Slate)
   for i=0,39 do part(street,"CurbStone",Vector3.new(.55,.44,5.8),CFrame.new(inner,.25,48-i*6),C.stone,Enum.Material.Concrete)end
  end
+ -- Broken dusty edges interrupt the uniform road without transparent overlays.
+ for _,side in ipairs({-1,1})do
+  for i=0,19 do
+   local width=random:NextNumber(.8,2.2)
+   part(street,"RoadShoulder",Vector3.new(width,.025,11.8),CFrame.new(8+side*(18-width/2),.124,45-i*12),Color3.fromRGB(124+i%3*3,116+i%2*3,96),Enum.Material.Ground).CastShadow=false
+  end
+  for i=1,5 do
+   local z=25-i*26;local x=8+side*17.8
+   part(street,"DrainGrate",Vector3.new(.6,.035,1.5),CFrame.new(x,.49,z),C.iron,Enum.Material.Metal).CastShadow=false
+   for slot=-1,1 do part(street,"GrateSlot",Vector3.new(.48,.01,.09),CFrame.new(x,.514,z+slot*.25),Color3.fromRGB(25,29,26),Enum.Material.SmoothPlastic).CastShadow=false end
+  end
+ end
  local function roof(model,frame,w,d,h,tint,detailed)
   local rise=3;local half=d/2+.7;local angle=math.atan(rise/half);local length=math.sqrt(half*half+rise*rise)
   for _,side in ipairs({-1,1})do
    local panel=frame*CFrame.new(0,h+rise/2,side*half/2)*CFrame.Angles(side*angle,0,0)
    part(model,"ClayRoof",Vector3.new(w+1.6,.23,length),panel,tint,Enum.Material.Brick)
    if detailed then
-    for row=-3,3 do part(model,"TileCourse",Vector3.new(w+1.65,.09,.1),panel*CFrame.new(0,.15,row*length/7),tint:Lerp(C.timber,.18),Enum.Material.Brick)end
-    for col=-3,3 do part(model,"TileSeam",Vector3.new(.055,.035,length),panel*CFrame.new(col*w/7,.15,0),tint:Lerp(C.wood,.22),Enum.Material.Brick).CastShadow=false end
+    for row=-2,2 do part(model,"TileCourse",Vector3.new(w+1.65,.09,.1),panel*CFrame.new(0,.15,row*length/5),tint:Lerp(C.timber,.18),Enum.Material.Brick)end
+    for col=-4,4 do part(model,"TileChannel",Vector3.new(length,.26,.26),panel*CFrame.new(col*w/9,.18,0)*CFrame.Angles(0,math.pi/2,0),tint:Lerp(C.timber,(col+4)%4*.045),Enum.Material.Brick,Enum.PartType.Cylinder).CastShadow=false end
    end
   end
+  if detailed then for _,side in ipairs({-1,1})do part(model,"EaveFascia",Vector3.new(w+1.7,.35,.18),frame*CFrame.new(0,h-.1,side*(half+.03)),C.wood,Enum.Material.Wood)end end
   part(model,"RidgeCap",Vector3.new(w+1.8,.32,.38),frame*CFrame.new(0,h+rise+.1,0),tint:Lerp(C.wood,.16),Enum.Material.Brick)
  end
  local function shop(parent,index,z,w,stories,tint,title,arcade)
   local side=if parent==west then -1 else 1
   local frame=CFrame.new(if side<0 then -23 else 39,0,z)*CFrame.Angles(0,side*math.pi/2,0)
   local model=group(string.format("Shop%02d",index),parent);model:SetAttribute("FictionalShop",true)
-  local d=17;local h=stories*7.7;local front=-d/2
+  local d=17;local h=stories*7.7+(index%3-1)*.45;local front=-d/2
   part(model,"PlasterMass",Vector3.new(w,h,d),frame*CFrame.new(0,h/2+.3,0),tint,Enum.Material.Plaster)
   part(model,"StonePlinth",Vector3.new(w+.2,1,d+.25),frame*CFrame.new(0,.65,0),C.stone,Enum.Material.Slate)
   part(model,"Cornice",Vector3.new(w+.6,.35,.6),frame*CFrame.new(0,h-.05,front-.22),C.cream,Enum.Material.Plaster)
@@ -95,28 +108,55 @@ function Environment.create()
    part(model,"Pilaster",Vector3.new(.45,h,.4),frame*CFrame.new(x,h/2+.3,front-.2),C.cream,Enum.Material.Plaster)
    part(model,"Capital",Vector3.new(.85,.3,.7),frame*CFrame.new(x,h-.5,front-.3),C.cream,Enum.Material.Plaster)
   end
+  -- Stains stay near the base/eaves; quiet midtones keep the facade readable.
+  if z> -70 then
+   for j=1,4 do
+    local width=random:NextNumber(1.1,3.1);local height=random:NextNumber(.16,.65)
+    part(model,"WornPlaster",Vector3.new(width,height,.025),frame*CFrame.new(random:NextNumber(-w/2+2,w/2-2),.9+height/2,front-.025),tint:Lerp(C.stone,.25),Enum.Material.Plaster).CastShadow=false
+   end
+   part(model,"ExposedBrick",Vector3.new(2.7,.48,.04),frame*CFrame.new(w*.38,.52,front-.04),Color3.fromRGB(119,99,77),Enum.Material.Brick).CastShadow=false
+   part(model,"EaveWeathering",Vector3.new(w-.8,.24,.025),frame*CFrame.new(0,h-.45,front-.035),tint:Lerp(C.stone,.2),Enum.Material.Plaster).CastShadow=false
+  end
   local function opening(x,y,door)
    local height=if door then 5.4 else 3.8
    part(model,"WindowRecess",Vector3.new(3.2,height+.3,.15),frame*CFrame.new(x,y,front-.15),Color3.fromRGB(35,42,36),Enum.Material.Wood)
-   for _,s in ipairs({-1,1})do
-    part(model,"WoodenShutter",Vector3.new(1.42,height,.16),frame*CFrame.new(x+s*.76,y,front-.28),if door then C.wood else C.green,Enum.Material.Wood)
-    part(model,"ShutterRail",Vector3.new(1.45,.12,.1),frame*CFrame.new(x+s*.76,y-height*.25,front-.4),C.timber,Enum.Material.Wood)
-    part(model,"ShutterRail",Vector3.new(1.45,.12,.1),frame*CFrame.new(x+s*.76,y+height*.25,front-.4),C.timber,Enum.Material.Wood)
+   local opened=not door and (index+math.floor(x))%3~=0
+   local timber=if door then C.wood:Lerp(C.timber,index%3*.12)else C.green:Lerp(C.wood,index%4*.08)
+   if opened then
+    local glass=part(model,"WindowGlass",Vector3.new(2.8,height-.2,.05),frame*CFrame.new(x,y,front-.24),Color3.fromRGB(66,79,75),Enum.Material.Glass)
+    glass.Reflectance=.08
+    part(model,"WindowMullion",Vector3.new(.1,height,.1),frame*CFrame.new(x,y,front-.31),C.timber,Enum.Material.Wood)
+    part(model,"WindowTransom",Vector3.new(2.9,.1,.1),frame*CFrame.new(x,y+.2,front-.31),C.timber,Enum.Material.Wood)
+   end
+   for _,leaf in ipairs({-1,1})do
+    local hinge=frame*CFrame.new(x+leaf*1.5,y,front-.28)
+    local shutter=if opened then hinge*CFrame.Angles(0,-leaf*math.rad(125),0)*CFrame.new(-leaf*.71,0,0)else frame*CFrame.new(x+leaf*.76,y,front-.28)
+    part(model,"WoodenShutter",Vector3.new(1.42,height,.16),shutter,timber,Enum.Material.Wood)
+    for _,rail in ipairs(if z> -35 then {-.25,.25}else {.25})do part(model,"ShutterRail",Vector3.new(1.45,.12,.1),shutter*CFrame.new(0,height*rail,-.12),C.timber,Enum.Material.Wood)end
+    if not door and z> -35 then
+     for slat=-1,1 do part(model,"LouverSlat",Vector3.new(1.2,.12,.13),shutter*CFrame.new(0,slat*.75,-.14)*CFrame.Angles(-.3,0,0),timber:Lerp(C.cream,.08),Enum.Material.Wood).CastShadow=false end
+    end
+    if door and leaf==1 then part(model,"DoorHandle",Vector3.new(.06,.24,.09),shutter*CFrame.new(-leaf*.5,0,-.14),C.iron,Enum.Material.Metal)end
    end
    part(model,"Lintel",Vector3.new(3.55,.28,.38),frame*CFrame.new(x,y+height/2+.15,front-.25),C.cream,Enum.Material.Concrete)
    part(model,"Sill",Vector3.new(3.55,.2,.48),frame*CFrame.new(x,y-height/2-.1,front-.3),C.stone,Enum.Material.Concrete)
   end
   for _,x in ipairs({-w*.32,0,w*.32})do opening(x,3.2,true);if stories==2 then opening(x,11.4,false)end end
   if stories==2 then part(model,"StoreyBand",Vector3.new(w+.4,.35,.5),frame*CFrame.new(0,8.1,front-.22),C.cream,Enum.Material.Plaster)end
-  local porch=frame*CFrame.new(0,7.15,front-2)
+  local porch=frame*CFrame.new(0,6.9+(index%3)*.12,front-2)
   local awningColor=if index%2==0 then C.green else Color3.fromRGB(144,116,77)
   part(model,"Awning",Vector3.new(w+.9,.16,4.7),porch*CFrame.Angles(-.14,0,0),awningColor,Enum.Material.Fabric)
-  for col=-2,2 do part(model,"CanvasStripe",Vector3.new(.75,.025,4.72),porch*CFrame.Angles(-.14,0,0)*CFrame.new(col*w/5,.11,0),Color3.fromRGB(185,173,135),Enum.Material.Fabric).CastShadow=false end
+  for col=-2,(if index%3==0 then -3 else 2) do part(model,"CanvasStripe",Vector3.new(.75,.025,4.72),porch*CFrame.Angles(-.14,0,0)*CFrame.new(col*w/5,.11,0),Color3.fromRGB(185,173,135),Enum.Material.Fabric).CastShadow=false end
   for _,x in ipairs({-w/2+.4,w/2-.4})do
    part(model,if arcade then "ArcadeColumn"else "VerandaPost",Vector3.new(if arcade then .6 else .18,6.8,if arcade then .6 else .18),frame*CFrame.new(x,3.4,front-3.8),if arcade then C.cream else C.wood,if arcade then Enum.Material.Plaster else Enum.Material.Wood)
   end
   if arcade then part(model,"ArcadeBeam",Vector3.new(w+.5,.65,.6),frame*CFrame.new(0,6.8,front-3.8),C.cream,Enum.Material.Plaster)end
-  if z> -90 then sign(model,"ShopSign",frame*CFrame.new(0,6.1,front-.6),Vector3.new(math.min(w-1,12),1.15,.2),title)end
+  if z> -90 then sign(model,"ShopSign",frame*CFrame.new(0,5.95,front-1.15),Vector3.new(math.min(w-1,12),1.05,.2),title)end
+  if stories==2 and index%3==2 then
+   part(model,"BalconySlab",Vector3.new(w*.72,.3,1.6),frame*CFrame.new(0,9.3,front-.8),C.stone,Enum.Material.Concrete)
+   part(model,"BalconyRail",Vector3.new(w*.7,.08,.08),frame*CFrame.new(0,10.6,front-1.55),C.iron,Enum.Material.Metal)
+   for j=-5,5 do part(model,"BalconyBaluster",Vector3.new(.045,1.2,.045),frame*CFrame.new(j*w*.065,9.95,front-1.55),C.iron,Enum.Material.Metal).CastShadow=false end
+  end
   roof(model,frame,w,d,h,if index%2==0 then C.roof else Color3.fromRGB(139,82,51),z> -70)
  end
  local shades={C.plaster,Color3.fromRGB(172,178,152),Color3.fromRGB(192,177,145),Color3.fromRGB(210,201,175)}
@@ -213,50 +253,6 @@ function Environment.create()
   for _,offset in ipairs({-2.5,2.5})do part(distance,"DistantWindow",Vector3.new(1.6,2.6,.1),CFrame.new(x+offset,h*.65,z+6.1),Color3.fromRGB(104,113,102),Enum.Material.Wood).CastShadow=false end
   roof(distance,CFrame.new(x,0,z),9,12,h,C.roof,false)
  end
- local function fighter(index,x,z,shirt,hat)
-  local model=group(string.format("Fighter%02d",index),fighters);model:SetAttribute("DecorativeFighter",true)
-  local root=CFrame.new(x,0,z)*CFrame.Angles(0,(index-2.5)*.025,0);model.WorldPivot=CFrame.new(origin)*root
-  local skin=Color3.fromRGB(153+index*5,113+index*4,76+index*3)
-  local function p(name,size,offset,color,mat,shape)return part(model,name,size,root*offset,color,mat,shape)end
-  p("Tunic",Vector3.new(2.05,2.05,1.05),CFrame.new(0,3.65,0),shirt,Enum.Material.Fabric)
-  p("Collar",Vector3.new(1.6,.2,1.14),CFrame.new(0,4.65,0),shirt:Lerp(C.wood,.12),Enum.Material.Fabric)
-  p("Belt",Vector3.new(2.1,.24,1.1),CFrame.new(0,2.87,0),C.wood,Enum.Material.Leather)
-  p("Neck",Vector3.new(.55,.45,.55),CFrame.new(0,4.95,0),skin)
-  p("Head",Vector3.new(1.22,1.2,1.15),CFrame.new(0,5.65,0),skin,Enum.Material.SmoothPlastic,Enum.PartType.Ball)
-  if hat=="Peci"then p("Peci",Vector3.new(1.27,.5,1.15),CFrame.new(0,6.23,0),C.iron,Enum.Material.Fabric)
-  elseif hat=="FieldCap"then
-   p("FieldCap",Vector3.new(1.28,.44,1.24),CFrame.new(0,6.2,0),C.green,Enum.Material.Fabric)
-   p("CapPeak",Vector3.new(1.3,.1,.62),CFrame.new(0,6.05,-.73),C.green,Enum.Material.Fabric)
-  else
-   p("Hair",Vector3.new(1.28,.6,1.2),CFrame.new(0,6.1,.03),Color3.fromRGB(37,34,27),Enum.Material.SmoothPlastic,Enum.PartType.Ball)
-   if hat=="Headband"then p("Headband",Vector3.new(1.3,.18,1.22),CFrame.new(0,5.97,0),C.cream,Enum.Material.Fabric)end
-  end
-  local bagTint=if index%2==0 then Color3.fromRGB(99,99,69)else Color3.fromRGB(109,84,49)
-  p("Backpack",Vector3.new(1.32,1.45,.62),CFrame.new(.12,3.67,.79),bagTint,Enum.Material.Fabric)
-  p("PackFlap",Vector3.new(1.4,.48,.72),CFrame.new(.12,4.2,.85),bagTint:Lerp(C.wood,.16),Enum.Material.Fabric)
-  p("PackBuckle",Vector3.new(.14,.3,.06),CFrame.new(.12,4,1.23),C.gold,Enum.Material.Metal)
-  for _,side in ipairs({-1,1})do
-   p("ShoulderStrap",Vector3.new(.17,2,.1),CFrame.new(side*.65,3.75,.59)*CFrame.Angles(0,0,side*.13),C.wood,Enum.Material.Leather)
-   p("BeltPouch",Vector3.new(.5,.6,.34),CFrame.new(side*.78,2.9,.66),C.wood,Enum.Material.Leather)
-   local phase=(index-1)*1.3+(if side<0 then math.pi else 0)
-   local hip=root*CFrame.new(side*.54,2.65,0);local legOffset=CFrame.new(0,-1.06,0)
-   local leg=part(model,"TrouserLeg",Vector3.new(.85,2.1,.92),hip*legOffset,C.green:Lerp(C.wood,index*.08),Enum.Material.Fabric)
-   motion(leg,hip,legOffset,.28,phase,1.4)
-   local bootOffset=CFrame.new(0,-2.3,-.17);local boot=part(model,"Boot",Vector3.new(.9,.55,1.35),hip*bootOffset,C.iron,Enum.Material.Leather)
-   motion(boot,hip,bootOffset,.28,phase,1.4)
-   local shoulder=root*CFrame.new(side*1.34,4.42,0);local armOffset=CFrame.new(0,-.85,0)
-   local arm=part(model,"Sleeve",Vector3.new(.67,1.7,.79),shoulder*armOffset,shirt,Enum.Material.Fabric);motion(arm,shoulder,armOffset,-.18,phase,1.4)
-   local handOffset=CFrame.new(0,-1.85,0);local hand=part(model,"Hand",Vector3.new(.59,.45,.63),shoulder*handOffset,skin);motion(hand,shoulder,handOffset,-.18,phase,1.4)
-  end
-  local sling=root*CFrame.new(-.98,3.4,1.02)*CFrame.Angles(0,0,-.3)
-  part(model,"SlungPropStock",Vector3.new(.28,1.3,.28),sling*CFrame.new(0,-.6,0),C.timber,Enum.Material.Wood)
-  part(model,"SlungPropForepiece",Vector3.new(.2,1.2,.2),sling*CFrame.new(0,.65,0),C.wood,Enum.Material.Wood)
-  part(model,"SlungPropBarrel",Vector3.new(.085,.95,.085),sling*CFrame.new(0,1.55,0),C.iron,Enum.Material.Metal)
- end
- fighter(1,-3.8,18.5,Color3.fromRGB(145,135,94),"FieldCap")
- fighter(2,-.4,16.8,Color3.fromRGB(184,173,135),"Hair")
- fighter(3,3,19.3,Color3.fromRGB(203,193,156),"Headband")
- fighter(4,6.4,17.7,Color3.fromRGB(157,155,113),"Peci")
  local anchor=part(scene,"CameraAnchor",Vector3.one,CFrame.lookAt(Vector3.new(-8,5.6,39),Vector3.new(-8,6.3,-130)),Color3.new())
  anchor.Transparency=1;anchor.CastShadow=false
  -- Face the street into the morning sun; motion metadata uses the same world transform.

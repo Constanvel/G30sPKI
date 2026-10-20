@@ -20,8 +20,9 @@ return function(player)
   check(math.abs(original.FieldOfView-Camera.fieldOfView(original.ViewportSize.X/original.ViewportSize.Y))<.001 and game.Lighting.ClockTime>6.5 and game.Lighting.ClockTime<8,"Golden hour camera profile")
   check(game.Lighting.FogStart>=80 and game.Lighting.FogEnd>=300,"Readable atmospheric depth")
   check(game.Lighting.OutdoorAmbient.R>game.Lighting.OutdoorAmbient.B,"Warm morning ambient")
+  game.Lighting.ClockTime=14.5;task.wait();check(math.abs(game.Lighting.ClockTime-7.05)<.001,"Late startup Lighting cannot replace the menu sunrise")
   local frame=controller.frame;local motion=controller.motions[1];local rest=motion.original
-  check(#controller.motions>30 and #controller.motions<=70,"Single callback covers bounded ambient motion")
+  check(#controller.motions==30,"Single callback covers bounded ambient motion")
   controller:start(scene);check(controller.frame==frame,"Repeated start preserves one loop")
   task.wait(.7);check(motion.instance.CFrame~=rest,"Scene motion animates")
   controller:setReduced(true);local pose=original.CFrame;local frozen=motion.instance.CFrame
@@ -30,7 +31,7 @@ return function(player)
   controller:refresh();check(original.CFrame==pose,"Character refresh preserves framing")
   controller:setReduced(false);task.wait(.03);check((original.CFrame.Position-pose.Position).Magnitude<.03,"Drift resumes without snapping")
   controller:stop();check(motion.instance.CFrame==rest,"Stop restores decorative rest pose")
-  check(controller.frame==nil and controller.viewport==nil and #controller.motions==0 and #controller.created==0,"Stop cleans loops and menu effects")
+  check(controller.frame==nil and controller.viewport==nil and controller.lighting==nil and #controller.motions==0 and #controller.created==0,"Stop cleans loops and menu effects")
   for _,v in ipairs(game.Lighting:GetChildren())do check(not v.Name:match("^MenuSunrise"),"Created lighting cannot leak into lobby")end
   for _=1,3 do check(controller:start(scene),"Repeated lifecycle start");controller:stop()end
  end)
