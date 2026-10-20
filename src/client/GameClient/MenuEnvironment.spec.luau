@@ -1,58 +1,44 @@
 --!strict
 return function()
  local Environment=require(script.Parent.MenuEnvironment)
- local region=Region3.new(Vector3.new(880,112,-172),Vector3.new(1120,164,76)):ExpandToGrid(4)
+ local region=Region3.new(Vector3.new(880,112,-212),Vector3.new(1120,164,76)):ExpandToGrid(4)
  local materials,occupancy=workspace.Terrain:ReadVoxels(region,4)
- local scene=Environment.create()
- local count=0
- local function check(value,message) assert(value,message); count+=1 end
+ local scene=Environment.create();local checks=0
+ local function check(value,message)assert(value,message);checks+=1 end
  local ok,message=pcall(function()
-  check(scene:GetAttribute("Location")=="Yogyakarta, 1 Maret 1949","Latar harus menyebut Yogyakarta pada 1 Maret 1949")
-  check(scene:GetAttribute("ArtisticReconstruction")==true,"Latar harus ditandai rekonstruksi artistik")
-  check(scene:GetAttribute("FictionalMeetingPlace")==true,"Pos pertemuan harus jelas merupakan lokasi fiktif")
-  check(not scene:FindFirstChild("WellZone") and not scene:FindFirstChild("WellInterior",true),"Latar lama tidak boleh tersisa")
-  check(scene:FindFirstChild("PlasterFacade",true) and scene:FindFirstChild("WoodenShutter",true),"Fasad plester dan jendela kayu harus tersedia")
-  check(scene:FindFirstChild("DirtPath")~=nil,"Jalur tanah harus tersedia")
-  check(scene:FindFirstChild("MeetingPost") and scene.MeetingPost:GetAttribute("FictionalMeetingPlace")==true,"Pos pertemuan fiktif harus tersedia")
-  check(scene:FindFirstChild("WoodenRadio",true) and scene:FindFirstChild("DeliveryCrate",true),"Radio kayu dan peti pengiriman harus tersedia")
-  check(scene:FindFirstChild("LowStreetWall") and scene:FindFirstChild("StreetHouse"),"Komposisi jalan kota harus tersedia")
-  check(scene:FindFirstChild("BroadleafTree",true)~=nil,"Pohon bertekstur harus tersedia")
-  check(scene:GetAttribute("VisualRevision")=="ENAM-JAM-YOGYA-01","Latar harus memakai revisi ENAM JAM")
-  local parts,lights,prompts,actors,unsafe,emitters,meshes=0,0,0,0,0,0,0
-  for _,object in ipairs(scene:GetDescendants()) do
-   if object:IsA("BasePart") then
-    parts+=1
-    if object:IsA("MeshPart") then meshes+=1; check(object.MeshId~="" and object.TextureID~="","Mesh harus memiliki geometri dan tekstur") end
-    if not object.Anchored or object.CanCollide or object.CanTouch or object.CanQuery then unsafe+=1 end
-   elseif object:IsA("PointLight") then lights+=1; check(not object.Shadows,"Lampu menu tidak membutuhkan shadow")
-   elseif object:IsA("ProximityPrompt") then prompts+=1
-   elseif object:IsA("Humanoid") then actors+=1
-   elseif object:IsA("ParticleEmitter") then emitters+=1 end
+  check(scene:GetAttribute("Location")=="Yogyakarta, 1 Maret 1949","Yogyakarta 1949 identity")
+  check(scene:GetAttribute("ArtisticReconstruction")==true,"Scene must be marked artistic")
+  check(scene:GetAttribute("VisualRevision")=="YOGYAKARTA-SUNRISE-02","Sunrise scene revision")
+  for _,name in ipairs({"Street","WestFrontages","EastFrontages","TuguPalPutih","StreetProps","Greenery","DistantCity","Fighters","CameraAnchor"})do check(scene:FindFirstChild(name)~=nil,"Missing scene group "..name)end
+  check(#scene.Fighters:GetChildren()==4,"Exactly four decorative fighters")
+  for _,fighter in ipairs(scene.Fighters:GetChildren())do
+   check(fighter:GetAttribute("DecorativeFighter")==true and fighter:FindFirstChild("Backpack") and fighter:FindFirstChild("Head"),"Fighter silhouette and kit")
+   check(fighter:GetPivot().LookVector:Dot(scene.CameraAnchor.CFrame.LookVector)>.9,"Fighters face away toward the city")
   end
-  check(parts<=300 and meshes>=60 and meshes<=100,"Anggaran mesh bertekstur menu terlampaui/tidak lengkap")
-  check(lights<=2,"Jangan menambah banyak sumber cahaya")
-  check(prompts==0 and actors==0,"Latar tidak boleh menjadi adegan interaktif/figur manusia")
-  check(unsafe==0,"Latar dekoratif harus terisolasi dari collision/query gameplay")
-  check(emitters==0,"Tidak perlu partikel untuk adegan ini")
-  check(scene.Ground.Material==Enum.Material.Ground,"Tanah wajib memakai material bertekstur")
-  task.wait(.25)
-  local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Include;params.FilterDescendantsInstances={workspace.Terrain}
-  local hit=workspace:Raycast(Vector3.new(1018,160,-13),Vector3.new(0,-60,0),params)
-  check(hit and math.abs(hit.Position.Y-128)<.5,"Terrain tidak boleh mengubur jalan atau fondasi bangunan")
-  check(scene.CameraAnchor:IsA("BasePart") and scene.CameraAnchor.Transparency==1,"Marker kamera wajib valid dan tersembunyi")
-  local baseplate=workspace:FindFirstChild("Baseplate")
-  check(not baseplate or scene.Ground.Position.Y-scene.Ground.Size.Y/2>baseplate.Position.Y+baseplate.Size.Y/2,"Baseplate gameplay tidak boleh menutupi tanah latar")
+  check(#scene.WestFrontages:GetChildren()==6 and #scene.EastFrontages:GetChildren()==6,"Twelve modular frontages")
+  check(scene:FindFirstChild("WoodenShutter",true) and scene:FindFirstChild("ShopSign",true) and scene:FindFirstChild("ClayRoof",true),"Layered historic shopfront details")
+  check(scene.Street.MainRoad.Size.Z>200 and scene.Street.MainRoad.Size.X>=30,"Strong road perspective")
+  check(scene.TuguPalPutih:GetAttribute("StylizedLandmark")==true,"Tugu must not claim a precise historical replica")
+  for _,name in ipairs({"Bicycle","MarketCart","TelegraphPole","OverheadWire","IndonesianFlag","DeliveryCrate"})do check(scene:FindFirstChild(name,true)~=nil,"Missing period prop "..name)end
+  local parts,meshes,motions,unsafe,humanoids,scripts,particles,lights=0,0,0,0,0,0,0,0
+  for _,v in ipairs(scene:GetDescendants())do
+   if v:IsA("BasePart")then
+    parts+=1;if v:IsA("MeshPart")then meshes+=1 end
+    if not v.Anchored or v.CanCollide or v.CanTouch or v.CanQuery then unsafe+=1 end
+    if v:GetAttribute("MenuMotionPivot")then motions+=1;check(typeof(v:GetAttribute("MenuMotionOffset"))=="CFrame","Motion offset must be captured")end
+   elseif v:IsA("Humanoid")then humanoids+=1 elseif v:IsA("LuaSourceContainer")then scripts+=1
+   elseif v:IsA("ParticleEmitter")then particles+=1 elseif v:IsA("Light")then lights+=1 end
+  end
+  check(parts<=1900 and meshes<=24,"Static scene part/mesh budget")
+  check(motions<=70 and motions>=32,"Bounded ambient animation")
+  check(unsafe==0 and humanoids==0 and scripts==0,"Scene cannot participate in gameplay or run actors")
+  check(particles==0 and lights==0,"Sunrise uses no emitters or local lights")
+  check(scene.CameraAnchor.Transparency==1 and scene:GetAttribute("MenuFOV")==52,"Main camera contract")
+  check(not scene:FindFirstChild("MeetingPost") and not scene:FindFirstChild("WellZone"),"Old composition removed")
  end)
  scene:Destroy()
- task.wait()
- local restoredMaterials,restoredOccupancy=workspace.Terrain:ReadVoxels(region,4)
- local restored=true
- for x,column in ipairs(materials) do
-  for y,row in ipairs(column) do for z,value in ipairs(row) do
-   if value~=restoredMaterials[x][y][z] or occupancy[x][y][z]~=restoredOccupancy[x][y][z] then restored=false end
-  end end
- end
- check(restored,"Region Terrain harus dipulihkan persis setelah scene dihancurkan")
- assert(ok,message)
- return tostring(count).." environment assertions PASS"
+ local afterM,afterO=workspace.Terrain:ReadVoxels(region,4);local same=true
+ for x,column in ipairs(materials)do for y,row in ipairs(column)do for z,value in ipairs(row)do if value~=afterM[x][y][z] or occupancy[x][y][z]~=afterO[x][y][z]then same=false end end end end
+ check(same,"Environment create/destroy must not alter terrain")
+ assert(ok,message);return tostring(checks).." environment assertions PASS"
 end

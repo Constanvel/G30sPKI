@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-20",
+  "assertions": 175,
+  "tests": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"MenuAnimation.spec\":{\"1\":true,\"2\":\"24 animation assertions PASS\"},\"MenuCamera.spec\":{\"1\":true,\"2\":\"51 camera assertions PASS\"},\"MenuEnvironment.spec\":{\"1\":true,\"2\":\"100 environment assertions PASS\"}}"
+      }
+    ],
+    "isError": false
+  },
+  "metrics": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"lighting\":{\"sunAngle\":6,\"clock\":6.650000095367432,\"latitude\":-7.800000190734863,\"brightness\":3,\"ambient\":\"0.572549, 0.505882, 0.411765\"},\"anchor\":\"962.570068, 133.600006, 13.5646076, 0.522687256, -0.00353113771, -0.852517188, 0, 0.999991417, -0.00414197799, 0.852524519, 0.00216495921, 0.522682786\",\"qa\":{\"MenuQAFrameMeanMs\":6.048202742305067,\"MenuQAFrameSamples\":180},\"counts\":{\"motions\":62,\"humanoids\":0,\"meshes\":18,\"parts\":1765}}"
+      }
+    ],
+    "isError": false
+  },
+  "runtimeCleanup": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"camera\":\"Enum.CameraType.Custom\",\"menu\":false,\"errors\":[],\"createdGrade\":false,\"lobby\":true,\"clock\":14.5}"
+      }
+    ],
+    "isError": false
+  },
+  "sourceParity": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"editorGui\":false,\"sources\":{\"MenuEnvironment.spec\":true,\"MenuCamera.spec\":true,\"MenuEnvironment\":true,\"MenuCameraController\":true},\"previewLeftBehind\":false,\"qaScriptLeftBehind\":false}"
+      }
+    ],
+    "isError": false
+  },
+  "limitations": [
+    "One Studio client only",
+    "No physical mobile or low-end device benchmark",
+    "Narrow viewport projection checked mathematically; no physical portrait playtest",
+    "Decorative artistic reconstruction; not a survey or verified 1949 street replica"
+  ]
+}
