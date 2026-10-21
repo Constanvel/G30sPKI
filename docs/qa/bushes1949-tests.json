@@ -1,0 +1,60 @@
+{
+  "project": "ENAM JAM: 1949",
+  "date": "2026-10-21",
+  "placeId": 97995024632294,
+  "sourceAsset": { "id": 7990107300, "creator": "Qalus", "source": "Creator Store" },
+  "prefabs": {
+    "path": "ServerStorage.EnvironmentAssets.Bushes1949",
+    "count": 3,
+    "visualMeshesPerPrefab": 1,
+    "sourceExecutableInstances": 0
+  },
+  "placement": {
+    "path": "Workspace.EnamJamLobby.RealisticEnvironment.Bushes1949",
+    "count": 65,
+    "visualMeshes": 65,
+    "variants": { "SemakRimbun_01": 22, "SemakLiar_02": 22, "SemakRenggang_03": 21 },
+    "archivedOriginalSpheres": 65,
+    "retainedClayPlanters": 6,
+    "retainedPlanterLeaves": 30,
+    "assertions": 936,
+    "result": "PASS",
+    "repeatInstallation": "PASS: no duplicates",
+    "checks": [
+      "Canonical pivot at ground, scale 1, four-stud footprint",
+      "Grounding after rotation and scales 0.75, 1, 1.25",
+      "Placed bounds rest on PackedEarth and remain inside fence limits",
+      "Original planting positions traceable to intact archived spheres",
+      "One mesh per bush, Atomic model streaming, Automatic render fidelity",
+      "Double-sided alpha leaves with valid color-map references",
+      "No scripts, collision, query, or touch participation",
+      "All three variants present; planters unchanged"
+    ]
+  },
+  "rebuild": {
+    "assertions": 936,
+    "result": "PASS",
+    "method": "Rebuild as temporary Bushes1949_RebuildQA, run Check against temporary library and actual placed models, then destroy temporary library",
+    "manifestMatchesEmbeddedData": true
+  },
+  "treeRegression": { "assertions": 207, "result": "PASS", "trees": 8 },
+  "play": {
+    "streamedBushes": 65,
+    "meshParts": 65,
+    "preloadedInstances": 130,
+    "fetchCallbacks": 65,
+    "fetchFailures": [],
+    "blockingParts": 0,
+    "startButton": { "menuEnabled": false, "lobbyEnabled": true, "cameraType": "Custom" },
+    "clientMessageErrors": []
+  },
+  "finalStudioMode": "Edit",
+  "limitations": [
+    "No physical mobile-device FPS or memory benchmark",
+    "No multiplayer, cold-cache, or published-experience test",
+    "No full movement playthrough of every path",
+    "Placement tool targets this flat PackedEarth courtyard, not arbitrary sloped terrain",
+    "No claim of verified 1949 site-specific botany",
+    "Native place checkpoint requires separate Studio save"
+  ]
+}
